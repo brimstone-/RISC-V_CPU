@@ -66,6 +66,20 @@ typedef struct packed {
 	/* ... other signals ... */
 } rv32i_control_word;
 
+typedef struct packed {
+	logic [31:0] i_imm;
+	logic [31:0] s_imm;
+	logic [31:0] b_imm;
+	logic [31:0] u_imm;
+	logic [31:0] j_imm;
+	logic [4:0] rd;
+	logic [4:0] rs1;
+	logic [4:0] rs2;
+	logic [31:0] pc;
+	rv32i_control_word ctrl;
+	logic valid;
+} stage_regs;
+
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
 typedef logic [3:0] rv32i_mem_wmask;
