@@ -78,8 +78,8 @@ typedef struct packed {
 	logic [31:0] u_imm;
 	logic [31:0] j_imm;
 	logic [4:0] rd;
-	logic [4:0] rs1;
-	logic [4:0] rs2;
+	logic [31:0] rs1;
+	logic [31:0] rs2;
 	logic [31:0] pc;
 	rv32i_control_word ctrl;
 	logic [31:0] alu;
