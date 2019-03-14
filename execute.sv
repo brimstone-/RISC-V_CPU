@@ -38,7 +38,10 @@ end
 // PC
 mux2 pc_mux
 (
-	
+	.sel(pc_mux_sel),
+	.a(i_imm),
+	.b(s_imm),
+	.f()
 );
 
 register pc_reg

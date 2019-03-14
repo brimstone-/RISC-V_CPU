@@ -58,6 +58,14 @@ typedef enum bit [2:0] {
     alu_and = 3'b111
 } alu_ops;
 
+typedef struct packed {
+	rv32i_opcode opcode;
+	alu_ops aluop;
+	logic regfilemux_sel;
+	logic load_regfile;
+	/* ... other signals ... */
+} rv32i_control_word;
+
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
 typedef logic [3:0] rv32i_mem_wmask;
