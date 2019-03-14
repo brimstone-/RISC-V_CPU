@@ -63,7 +63,12 @@ typedef struct packed {
 	alu_ops aluop;
 	logic regfilemux_sel;
 	logic load_regfile;
-	/* ... other signals ... */
+	branch_funct3_t cmpop;
+	logic [3:0] mem_byte_enable;
+	logic pcmux_sel;
+	logic alumux1_sel;
+	logic [2:0] alumux2_sel;
+	logic cmpmux_sel;
 } rv32i_control_word;
 
 typedef struct packed {
