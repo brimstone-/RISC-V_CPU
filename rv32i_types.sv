@@ -82,6 +82,8 @@ typedef struct packed {
 	logic [4:0] rs2;
 	logic [31:0] pc;
 	rv32i_control_word ctrl;
+	logic [31:0] alu;
+	logic [31:0] br;
 	logic valid;
 } stage_regs;
 
