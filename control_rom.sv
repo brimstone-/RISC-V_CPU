@@ -34,13 +34,12 @@ begin
 			ctrl.aluop = alu_add;
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 1;
-			ctrl.aluop = alu_add;
 		end
 
 		op_jal: begin
 			ctrl.load_regfile = 1;
 			ctrl.regfilemux_sel = 4;
-			ctrl.pcmux_sel = 1; // fetch stage pcmux
+			//ctrl.pcmux_sel = 1; // fetch stage pcmux
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 5;
 			ctrl.aluop = alu_add;
@@ -49,13 +48,14 @@ begin
 		op_jalr: begin
 			ctrl.load_regfile = 1;
 			ctrl.regfilemux_sel = 4;
-			ctrl.pcmux_sel = 1; // fetch stage pcmux
+			//ctrl.pcmux_sel = 1; // fetch stage pcmux
 			ctrl.alumux1_sel = 0;
 			ctrl.alumux2_sel = 0;
+			ctrl.aluop = alu_add;
 		end
 
 		op_br: begin
-			//ctrl.pcmux_sel = br_en; // ???
+      //ctrl.pcmux_sel = br_en;
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 2;
 			ctrl.aluop = alu_add;
@@ -74,10 +74,29 @@ begin
       ctrl.load_regfile = 1;
 
 			case (arith_funct3_t'(funct3))
-				slt: ;
-				sltu: ;
-				sr: ;
-				default: ;
+				slt: begin
+          ctrl.cmpop = blt; // blt for SLTI ,bltu for SLTIU
+					ctrl.regfilemux_sel = 1;
+					ctrl.cmpmux_sel = 1; 
+        end
+
+				sltu: begin
+					ctrl.cmpop = bltu; // blt for SLTI ,bltu for SLTIU
+					ctrl.regfilemux_sel = 1;
+					ctrl.cmpmux_sel = 1; 
+        end
+
+				sr: begin
+					if (funct7 == 7'b0100000) begin
+						aluop = alu_sra; // if funct7's fifth bit is 1, SRAI
+					end else begin
+						aluop = alu_srl; // otherwise it's SRLI
+					end
+				end
+
+				default: begin
+					aluop = alu_ops'(funct3);
+				end
 			endcase
 		end
 

@@ -80,8 +80,8 @@ register #($bits(out)) stage_reg
 (
 	 .clk(clk),
     .load(1'b1), 					// always high for now. will be dependedent on mem_resp later
-    .in(out),							// struct of things to pass to stage 3
-    .out(regs)								// values stage 3 holds
+    .in(out),						// struct of things to pass to stage 4
+    .out(regs)						// values stage 3 holds
 );
 
 endmodule : execute
