@@ -61,7 +61,7 @@ typedef enum bit [2:0] {
 typedef struct packed {
 	rv32i_opcode opcode;
 	alu_ops aluop;
-	logic regfilemux_sel;
+	logic [2:0] regfilemux_sel;
 	logic load_regfile;
 	branch_funct3_t cmpop;
 	logic [3:0] mem_byte_enable;
@@ -85,6 +85,7 @@ typedef struct packed {
 	logic [31:0] alu;
 	logic [31:0] br;
 	logic valid;
+	logic [2:0] funct3;
 } stage_regs;
 
 typedef logic [31:0] rv32i_word;
