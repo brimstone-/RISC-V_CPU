@@ -36,6 +36,7 @@ assign stage.ctrl 	= ctrl;
 assign stage.valid 	= 1;
 assign stage.alu 		= 32'bz;
 assign stage.br		= 32'bz;
+assign stage.funct3 	= funct3;
 
 ir IR
 (
