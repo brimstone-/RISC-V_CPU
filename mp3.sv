@@ -19,16 +19,16 @@ logic [31:0] mem_wdata;
 logic [31:0] mem_rdata;
 logic [3:0] mem_byte_enable;
 
-cpu cpu
-(
-	.clk,
-	.mem_resp(mem_resp),
-	.mem_rdata(mem_rdata),
-	.mem_read(mem_read),
-	.mem_write(mem_write),
-	.mem_byte_enable(mem_byte_enable),
-	.mem_address(mem_address),
-	.mem_wdata(mem_wdata)
-);
+//cpu cpu
+//(
+//	.clk,
+//	.mem_resp(mem_resp),
+//	.mem_rdata(mem_rdata),
+//	.mem_read(mem_read),
+//	.mem_write(mem_write),
+//	.mem_byte_enable(mem_byte_enable),
+//	.mem_address(mem_address),
+//	.mem_wdata(mem_wdata)
+//);
 
 endmodule : mp3

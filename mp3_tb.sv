@@ -19,7 +19,12 @@ logic [31:0] pc;
 logic [31:0] cache_out;
 logic ld_regfile;
 logic [4:0] rd;
-stage_regs regs;
+
+stage_regs stage_three_regs;
+
+//stage_regs in;
+//stage_regs out;
+
 //logic [15:0] errcode;
 
 ///* autograder signals */
@@ -51,6 +56,35 @@ always #5 clk = ~clk;
 //assign data1 = dut.cache.datapath.line[1].data;
 //assign tags0 = dut.cache.datapath.tag[0].data;
 //assign tags1 = dut.cache.datapath.tag[1].data;
+
+//initial
+//begin
+//	in.i_imm = 1;
+//	in.s_imm = 2;
+//	in.b_imm = 3;
+//	in.u_imm = 4;
+//	in.j_imm = 5;
+//	in.rd = 1;
+//	in.rs1 = 2;
+//	in.rs2 = 3;
+//	in.pc = 32'h00000060;
+//	in.br = 0;
+//	in.valid = 1;
+//
+//	in.ctrl.opcode = op_auipc;
+//	in.ctrl.aluop = alu_add;
+//	in.ctrl.regfilemux_sel = ;
+//	in.ctrl.load_regfile = ;
+//	in.ctrl.cmpop = ;
+//	in.ctrl.mem_byte_enable = ;
+//	in.ctrl.pcmux_sel = ;
+//	in.ctrl.alumux1_sel = ;
+//	in.ctrl.alumux2_sel = ;
+//	in.ctrl.cmpmux_sel = ;
+
+
+//end
+
 initial
 begin
 	 reg_in = 32'h97;
@@ -69,8 +103,10 @@ begin
 	 ld_regfile = 0;
 	 #10
 	 pc = 32'h64;
+	 #20
 	 $finish;
 end
+
 //always @(posedge clk)
 //begin
 		
@@ -96,12 +132,19 @@ end
 //    end
 //    if (dut.cpu.load_pc) order = order + 1;
 //end
-decode stage_two
-(
-	 .*
-);
-/*
 
+cpu dut
+(
+	.clk,
+	.reg_in,
+	.pc,
+	.cache_out,
+	.ld_regfile,
+	.rd,
+	.out_tb(stage_three_regs)
+);
+
+/*
 mp3 dut(
     .*
 );

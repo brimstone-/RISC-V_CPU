@@ -12,10 +12,10 @@ always_comb
 begin
 	/* Default assignments */
 	ctrl.opcode = opcode;
-	ctrl.load_regfile = 1’b0;
+	ctrl.load_regfile = 1'b0;
 	ctrl.aluop = alu_ops'(funct3);
 	ctrl.cmpop = branch_funct3_t'(funct3);
-  ctrl.mem_byte_enable = 4'b1111;
+	ctrl.mem_byte_enable = 4'b1111;
 
 	ctrl.regfilemux_sel = 3'b000;
 	ctrl.pcmux_sel = 1'b0;
@@ -31,6 +31,9 @@ begin
 		end
 
 		op_auipc: begin
+			ctrl.aluop = alu_add;
+			ctrl.alumux1_sel = 1;
+			ctrl.alumux2_sel = 1;
 			ctrl.aluop = alu_add;
 		end
 
@@ -52,7 +55,7 @@ begin
 		end
 
 		op_br: begin
-			ctrl.pcmux_sel = br_en; // ???
+			//ctrl.pcmux_sel = br_en; // ???
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 2;
 			ctrl.aluop = alu_add;
@@ -70,11 +73,11 @@ begin
 		op_imm: begin
       ctrl.load_regfile = 1;
 
-			case (funct3'(arith_funct3_t))
-				slt:
-				sltu:
-				sr:
-				default:
+			case (arith_funct3_t'(funct3))
+				slt: ;
+				sltu: ;
+				sr: ;
+				default: ;
 			endcase
 		end
 
@@ -83,7 +86,7 @@ begin
 			ctrl.alumux1_sel = 0;
 			ctrl.alumux2_sel = 4;
 			
-			case (funct3'(arith_funct3_t))
+			case (arith_funct3_t'(funct3))
 				add: begin // ADD/SUB same code, case on funct7
 					if (funct7 == 7'b0100000) begin
 						ctrl.aluop = alu_sub;
@@ -115,6 +118,7 @@ begin
 				default: begin // everything else has a unique code
 					ctrl.aluop = alu_ops'(funct3);
 				end
+
 			endcase
 		end
 
@@ -123,6 +127,7 @@ begin
 		default: begin
 			ctrl = 0;   /* Unknown opcode, set control word to zero */
 		end
+
 	endcase
 end
 
