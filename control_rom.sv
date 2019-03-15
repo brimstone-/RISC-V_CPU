@@ -88,14 +88,14 @@ begin
 
 				sr: begin
 					if (funct7 == 7'b0100000) begin
-						aluop = alu_sra; // if funct7's fifth bit is 1, SRAI
+						ctrl.aluop = alu_sra; // if funct7's fifth bit is 1, SRAI
 					end else begin
-						aluop = alu_srl; // otherwise it's SRLI
+						ctrl.aluop = alu_srl; // otherwise it's SRLI
 					end
 				end
 
 				default: begin
-					aluop = alu_ops'(funct3);
+					ctrl.aluop = alu_ops'(funct3);
 				end
 			endcase
 		end
