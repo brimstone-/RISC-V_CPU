@@ -73,7 +73,6 @@ begin
 
       	case(load_funct3_t'(funct3))
              lh, lb, lh: ctrl.read_b = 1;
-             default: ctrl.read_b = 1'bx;
         endcase 
         ctrl.aluop = alu_add;
 		end
