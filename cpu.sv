@@ -52,7 +52,7 @@ execute stage_three
 
 mem stage_four
 (
-	.clk, 
+	.clk,
 	.regs_in(stage_three_regs), 
 	.regs_out(stage_four_regs)
 );
