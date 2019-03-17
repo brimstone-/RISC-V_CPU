@@ -2,14 +2,13 @@ import rv32i_types::*;
 
 module decode
 (
-	 input [31:0] rdata_a,
-    input [31:0] pc,
-	 input [31:0] cache_out,
-    input logic ld_regfile,
-    input [4:0] rd,
-	 input clk,
-	 output stage_regs regs_out
-	 
+	input clk,
+	input [31:0] rdata_a,
+	input [31:0] pc,
+	input [31:0] cache_out,
+	input logic ld_regfile,
+	input [4:0] rd,
+	output stage_regs regs_out
 );
 
 logic load_all;

@@ -37,11 +37,12 @@ fetch stage_one
 decode stage_two
 (
 	.clk,
-	.pc(stage_one_regs.pc),
+	.rdata_a, // from fetch
+	.pc(stage_one_regs.pc), // from fetch
 	.cache_out(data_out), // from wb
-	.ld_regfile(ld_regfile),
-	.rd(rd),
-	.regs(stage_two_regs)
+	.ld_regfile(ld_regfile), // from wb
+	.rd(rd), // from wb
+	.regs_out(stage_two_regs)
 );
 
 execute stage_three
