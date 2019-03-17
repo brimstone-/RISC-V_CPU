@@ -56,6 +56,7 @@ ir IR
 control_rom ROM
 (
     .opcode(ir_op),
+	 .s_imm(s),
     .funct3(funct3),
 	 .funct7(funct7),
 	 .ctrl(ctrl)
