@@ -72,6 +72,7 @@ assign regs.j_imm = regs_in.j_imm;
 assign regs.rd = regs_in.rd;
 assign regs.rs1 = regs_in.rs1;
 assign regs.rs2 = regs_in.rs2;
+assign regs.alu = alu_out;
 assign regs.pc = alu_out;
 assign regs.ctrl = regs_in.ctrl;
 assign regs.br = {{31{1'b0}},br_en};
