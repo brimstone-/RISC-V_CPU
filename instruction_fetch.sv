@@ -6,10 +6,10 @@ module fetch (
 	 input resp_a,
 	 output rv32i_word address_a,
     input stage_regs regs_in,
-    output stage_regs regs_out
+    output [31:0] pc
 ); 
 
-stage_regs out, regs_out;
+stage_regs regs_out;
 rv32i_word pcmux_out;
 rv32i_word pc_out;
 
@@ -35,16 +35,11 @@ pc_plus4 pc_plus4 (
 assign address_a = pc_out;
 assign read_a = 1'b1;
 
-// pass through our input values 
-assign out.pc = pc_out;
-assign out.ctrl = regs_in.ctrl;
-assign out.valid = regs_in.valid;
-
-register #($bits(out)) stage_reg (
+register pc_reg (
 	.clk(clk),
 	.load(resp_a),
-	.in(out),
-	.out(regs_out)
+	.in(pc_out),
+	.out(pc)
 );
 
 endmodule: fetch
