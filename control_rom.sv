@@ -3,8 +3,8 @@ import rv32i_types::*;
 module control_rom
 (
 	input rv32i_opcode opcode,
-  input [2:0] funct3,
-  input [6:0] funct7,
+	input [2:0] funct3,
+	input [6:0] funct7,
 	output rv32i_control_word ctrl
 );
 

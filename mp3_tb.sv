@@ -9,43 +9,14 @@ logic clk;
 logic pmem_resp;
 logic pmem_read;
 logic pmem_write;
+logic pmem_error;
 logic [31:0] pmem_address;
 logic [255:0] pmem_wdata;
 logic [255:0] pmem_rdata;
 
-
-logic [31:0] reg_in;
-logic [31:0] pc;
-logic [31:0] cache_out;
-logic ld_regfile;
-logic [4:0] rd;
-
-stage_regs stage_three_regs;
-
-//stage_regs in;
-//stage_regs out;
-
-//logic [15:0] errcode;
-
-///* autograder signals */
-//logic [255:0] write_data;
-//logic [27:0] write_address;
-//logic write;
-//logic halt;
-//logic sm_error;
-//logic pm_error;
-//logic [31:0] registers [32];
-//logic [255:0] data0 [8];
-//logic [255:0] data1 [8];
-//logic [23:0] tags0 [8];
-//logic [23:0] tags1 [8];
-//logic [63:0] order;
-
 initial
 begin
     clk = 0;
-    //order = 0;
-    //halt = 0;
 end
 
 /* Clock generator */
@@ -56,56 +27,6 @@ always #5 clk = ~clk;
 //assign data1 = dut.cache.datapath.line[1].data;
 //assign tags0 = dut.cache.datapath.tag[0].data;
 //assign tags1 = dut.cache.datapath.tag[1].data;
-
-//initial
-//begin
-//	in.i_imm = 1;
-//	in.s_imm = 2;
-//	in.b_imm = 3;
-//	in.u_imm = 4;
-//	in.j_imm = 5;
-//	in.rd = 1;
-//	in.rs1 = 2;
-//	in.rs2 = 3;
-//	in.pc = 32'h00000060;
-//	in.br = 0;
-//	in.valid = 1;
-//
-//	in.ctrl.opcode = op_auipc;
-//	in.ctrl.aluop = alu_add;
-//	in.ctrl.regfilemux_sel = ;
-//	in.ctrl.load_regfile = ;
-//	in.ctrl.cmpop = ;
-//	in.ctrl.mem_byte_enable = ;
-//	in.ctrl.pcmux_sel = ;
-//	in.ctrl.alumux1_sel = ;
-//	in.ctrl.alumux2_sel = ;
-//	in.ctrl.cmpmux_sel = ;
-
-
-//end
-
-initial
-begin
-	 reg_in = 32'h97;
-	 pc = 32'h60;
-	 ld_regfile = 0;
-	 cache_out = 32'hdeadbeef;
-	 rd = 3;
-	 #100
-	 ld_regfile = 1;
-	 #20
-	 ld_regfile = 0;
-	 #100
-	 rd = 7;
-	 ld_regfile = 1;
-	 #20
-	 ld_regfile = 0;
-	 #10
-	 pc = 32'h64;
-	 #20
-	 $finish;
-end
 
 //always @(posedge clk)
 //begin
@@ -133,25 +54,29 @@ end
 //    if (dut.cpu.load_pc) order = order + 1;
 //end
 
-cpu dut
-(
-	.clk,
-	.reg_in,
-	.pc,
-	.cache_out,
-	.ld_regfile,
-	.rd,
-	.out_tb(stage_three_regs)
-);
-
-/*
-mp3 dut(
-    .*
-);
-
-magic_memory_dp magic_memory
+mp3 dut
 (
 	.*
 );
-*/
+
+magic_memory_dp megic_mem
+(
+    .clk,
+
+    /* Port A */
+    .read_a,
+    .address_a,
+    .resp_a,
+    .rdata_a,
+
+    /* Port B */
+    .read_b,
+    .write,
+    .wmask,
+    .address_b,
+    .wdata,
+    .resp_b,
+    .rdata_b;
+);
+
 endmodule : mp3_tb

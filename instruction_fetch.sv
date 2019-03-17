@@ -1,28 +1,31 @@
 import rv32i_types::*;
 
-module instruction_fetch (
+module fetch (
     input logic clk, 
-    input stage_regs in, 
-
-    output stage_regs regs
+	 input rv32i_word rdata_a,
+	 output read_a,
+	 output rv32i_word address_a,
+	 input resp_a,
+    input stage_regs regs_in,
+    output stage_regs regs_out
 ); 
 
-stage_regs out;
-rv32i_word pcmux_out;  
-rv32i_word pc_out;     
+stage_regs out, regs_out;
+rv32i_word pcmux_out;
+rv32i_word pc_out;
 
 mux2 pc_mux (
-    .sel(in.ctrl.pcmux_sel),
-    .a(pc_plus4_out),
-    .b(in.pc),
-    .f(pcmux_out)
+	.sel(regs_in.ctrl.pcmux_sel),
+	.a(pc_plus4_out),
+	.b(regs_in.pc),
+	.f(pcmux_out)
 );
 
 pc_register pc (
-    .clk(clk),
-    .load(1'b1), 
-    .in(pcmux_out),
-    .out(pc_out), 
+	.clk(clk),
+	.load(1'b1), 
+	.in(pcmux_out),
+	.out(pc_out), 
 );
 
 pc_plus4 pc_plus4 (
@@ -30,17 +33,22 @@ pc_plus4 pc_plus4 (
 	.out(pc_plus4_out)
 );
 
+assign address_a = pc_out;
+assign read_a = 1'b1;
+
 // pass through our input values 
 assign out.pc = pc_out;
-assign out.ctrl = in.ctrl;
-assign out.valid = in.valid;
+assign out.ctrl = regs_in.ctrl;
+assign out.valid = regs_in.valid;
+
 // TODO: for cache, need to pass for iCache
+assign out.rdata_a = rdata_a;
 
 register #($bits(out)) stage_reg (
 	.clk(clk),
-    .load(1'b1), 					
-    .in(out),						
-    .out(regs)						
+	.load(resp_a),
+	.in(out),
+	.out(regs_out)
 );
 
-endmodule: instruction_fetch
+endmodule: fetch

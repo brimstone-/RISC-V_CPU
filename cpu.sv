@@ -2,57 +2,69 @@ import rv32i_types::*;
 
 module cpu
 (
-//	input clk,
-//	input mem_resp,
-//	input rv32i_word mem_rdata,
-//	
-//	output logic mem_read,
-//	output logic mem_write,
-//	output rv32i_mem_wmask mem_byte_enable,
-//	output logic [31:0] mem_address,
-//	output logic [31:0] mem_wdata
-	 input [31:0] reg_in,
-    input [31:0] pc,
-	 input [31:0] cache_out,
-    input logic ld_regfile,
-    input [4:0] rd,
-	 input clk,
-	 output stage_regs out_tb
+	input clk,
+
+	// port A
+	output read_a,
+	output [31:0] address_a,
+	input resp_a,
+	input [31:0] rdata_a,
+	
+	// port B
+	input read_b,
+	input write,
+	input [3:0] wmask,
+	input [31:0] address_b,
+	input [31:0] wdata,
+	output logic resp_b,
+	output logic [31:0] rdata_b
 );
 
-//fetch
-//(
-//	.*
-//);
+stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs;
 
-stage_regs out;
+fetch stage_one
+(
+    .clk, 
+	 .read_a,
+	 .address_a,
+	 .rdata_a,
+	 .resp_a,
+	 .instruction_out(instruction_out),
+	 .regs_in(stage_five_regs),
+    .regs_out(stage_one_regs)
+);
 
 decode stage_two
 (
-	 .reg_in,
-    .pc,
-	 .cache_out,
-    .ld_regfile,
-    .rd,
-	 .clk,
-	 .regs(out)
+	.clk,
+	.pc(stage_one_regs.pc),
+	.cache_out(data_out), // from wb
+	.ld_regfile(ld_regfile),
+	.rd(rd),
+	.regs(stage_two_regs)
 );
 
 execute stage_three
 (
 	.clk,
-	.in(out),
-	.regs(out_tb)
+	.regs_in(stage_two_regs),
+	.regs_out(stage_three_regs)
 );
 
-//memory
-//(
-//	.*
-//);
+mem stage_four
+(
+	.clk, 
+	.regs_in(stage_three_regs), 
+	.regs_out(stage_four_regs)
+);
 
-//writeback
-//(
-//	.*
-//);
+writeback stage_five
+(
+	.rdata_b,
+	.regs_in(stage_four_regs),
+	.rd_data(rd_data),
+	.ld_regfile(ld_regfile),
+	.rd(rd)
+);
 
 endmodule : cpu

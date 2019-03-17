@@ -3,32 +3,26 @@ import rv32i_types::*;
 module mp3
 (
 	input clk,
+
+	// port A
+	output read_a,
+	output [31:0] address_a,
+	input resp_a,
+	input [31:0] rdata_a,
 	
-	input logic pmem_resp, pm_error,
-	input logic [255:0] pmem_rdata,
-	
-	output pmem_read,
-	output pmem_write,
-	output [31:0] pmem_address,
-	output [255:0] pmem_wdata
+	// port B
+	input read_b,
+	input write,
+	input [3:0] wmask,
+	input [31:0] address_b,
+	input [31:0] wdata,
+	output logic resp_b,
+	output logic [31:0] rdata_b
 );
 
-logic mem_read, mem_write, mem_resp;
-logic [31:0] mem_address;
-logic [31:0] mem_wdata;
-logic [31:0] mem_rdata;
-logic [3:0] mem_byte_enable;
-
-//cpu cpu
-//(
-//	.clk,
-//	.mem_resp(mem_resp),
-//	.mem_rdata(mem_rdata),
-//	.mem_read(mem_read),
-//	.mem_write(mem_write),
-//	.mem_byte_enable(mem_byte_enable),
-//	.mem_address(mem_address),
-//	.mem_wdata(mem_wdata)
-//);
+cpu cpu
+(
+	.*
+);
 
 endmodule : mp3

@@ -72,6 +72,7 @@ typedef struct packed {
 } rv32i_control_word;
 
 typedef struct packed {
+	logic [31:0] rdata_a;
 	logic [31:0] i_imm;
 	logic [31:0] s_imm;
 	logic [31:0] b_imm;
