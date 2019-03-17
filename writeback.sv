@@ -6,12 +6,15 @@ module writeback #(parameter width = 32)
 	 input stage_regs regs_in,
 	 output [31:0] rd_data,
 	 output logic ld_regfile,
-	 output [4:0] rd
+	 output [4:0] rd,
+	 output stage_regs regs_out
 );
 
 logic [31:0] mask_out;
 assign rd = regs_in.rd;
 assign ld_regfile = regs_in.ctrl.load_regfile;
+
+assign regs_out = regs_in;
 
 mem_mask mask
 (

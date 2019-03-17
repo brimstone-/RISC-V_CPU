@@ -38,7 +38,7 @@
 
 set_global_assignment -name FAMILY "Stratix III"
 set_global_assignment -name DEVICE EP3SE80F1152C2
-set_global_assignment -name TOP_LEVEL_ENTITY cpu
+set_global_assignment -name TOP_LEVEL_ENTITY mp3
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "15:37:37  MARCH 14, 2019"
 set_global_assignment -name LAST_QUARTUS_VERSION 13.1
@@ -56,10 +56,6 @@ set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id mp3_tb
 set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "200 ns" -section_id mp3_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME mp3_tb -section_id mp3_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE mp3_tb.sv -section_id mp3_tb
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SYSTEMVERILOG_FILE pc_reg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE pc_plus4.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem_mask.sv
@@ -86,3 +82,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
 set_global_assignment -name SYSTEMVERILOG_FILE writeback.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cmp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -16,6 +16,7 @@ begin
 	ctrl.aluop = alu_ops'(funct3);
 	ctrl.cmpop = branch_funct3_t'(funct3);
 	ctrl.mem_byte_enable = 4'b1111;
+	ctrl.write = 1'b0;
 
 	ctrl.regfilemux_sel = 3'b000;
 	ctrl.pcmux_sel = 1'b0;

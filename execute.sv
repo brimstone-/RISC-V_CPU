@@ -63,19 +63,19 @@ cmp cmp_module
 );
 
 // stage_regs value passing
-assign regs.i_imm = in.i_imm;
-assign regs.s_imm = in.s_imm;
-assign regs.b_imm = in.b_imm;
-assign regs.u_imm = in.u_imm;
-assign regs.j_imm = in.j_imm;
-assign regs.rd = in.rd;
-assign regs.rs1 = in.rs1;
-assign regs.rs2 = in.rs2;
+assign regs.i_imm = regs_in.i_imm;
+assign regs.s_imm = regs_in.s_imm;
+assign regs.b_imm = regs_in.b_imm;
+assign regs.u_imm = regs_in.u_imm;
+assign regs.j_imm = regs_in.j_imm;
+assign regs.rd = regs_in.rd;
+assign regs.rs1 = regs_in.rs1;
+assign regs.rs2 = regs_in.rs2;
 assign regs.pc = regs_out.alu;
-assign regs.ctrl = in.ctrl;
+assign regs.ctrl = regs_in.ctrl;
 assign regs.br = {{31{1'b0}},br_en};
-assign regs.valid = in.valid;
-assign regs.funct3 = in.funct3;
+assign regs.valid = regs_in.valid;
+assign regs.funct3 = regs_in.funct3;
 
 register #($bits(out)) stage_reg
 (

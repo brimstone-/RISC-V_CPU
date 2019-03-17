@@ -27,8 +27,8 @@ module mem (
 assign read_b = 1'b1;
 assign write = regs_in.ctrl.write;
 assign wmask = regs_in.ctrl.mem_byte_enable;
-assign address_b = in.pc;
-assign wdata = in.alu;
+assign address_b = regs_in.pc;
+assign wdata = regs_in.alu;
 
 register #($bits(out)) stage_reg (
 	.clk(clk),

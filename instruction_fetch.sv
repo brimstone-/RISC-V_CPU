@@ -13,6 +13,8 @@ stage_regs regs_out;
 rv32i_word pcmux_out;
 rv32i_word pc_out;
 
+logic [31:0] pc_plus4_out;
+
 mux2 pc_mux (
 	.sel(regs_in.ctrl.pcmux_sel),
 	.a(pc_plus4_out),
@@ -20,11 +22,11 @@ mux2 pc_mux (
 	.f(pcmux_out)
 );
 
-pc_register pc (
+pc_register pc_reg (
 	.clk(clk),
 	.load(1'b1), 
 	.in(pcmux_out),
-	.out(pc_out), 
+	.out(pc_out)
 );
 
 pc_plus4 pc_plus4 (
@@ -35,7 +37,7 @@ pc_plus4 pc_plus4 (
 assign address_a = pc_out;
 assign read_a = 1'b1;
 
-register pc_reg (
+register stage_reg (
 	.clk(clk),
 	.load(resp_a),
 	.in(pc_out),

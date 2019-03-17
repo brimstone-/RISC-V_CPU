@@ -5,22 +5,28 @@ module cpu
 	input clk,
 
 	// port A
-	output read_a,
-	output [31:0] address_a,
+	output logic read_a,
+	output logic [31:0] address_a,
 	input resp_a,
 	input [31:0] rdata_a,
 	
 	// port B
-	input read_b,
-	input write,
-	input [3:0] wmask,
-	input [31:0] address_b,
-	input [31:0] wdata,
-	output logic resp_b,
-	output logic [31:0] rdata_b
+	output logic read_b,
+	output logic write,
+	output logic [3:0] wmask,
+	output logic [31:0] address_b,
+	output logic [31:0] wdata,
+	input resp_b,
+	input [31:0] rdata_b
 );
 
-stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs;
+stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, stage_five_regs;
+
+logic ld_regfile;
+logic [4:0] rd;
+
+rv32i_word rd_data;
+rv32i_word pc;
 
 fetch stage_one
 (
@@ -29,15 +35,15 @@ fetch stage_one
 	 .address_a,
 	 .resp_a,
 	 .regs_in(stage_five_regs),
-    .regs_out(stage_one_regs)
+    .pc
 );
 
 decode stage_two
 (
 	.clk,
 	.rdata_a, // from instruction cache
-	.pc(stage_one_regs.pc), // from fetch
-	.cache_out(data_out), // from wb
+	.pc, // from fetch
+	.cache_out(rd_data), // from wb
 	.ld_regfile(ld_regfile), // from wb
 	.rd(rd), // from wb
 	.regs_out(stage_two_regs)
@@ -53,7 +59,13 @@ execute stage_three
 mem stage_four
 (
 	.clk,
-	.regs_in(stage_three_regs), 
+	.regs_in(stage_three_regs),
+	.resp_b,
+	.read_b,
+	.write,
+	.wmask,
+	.address_b,
+	.wdata,
 	.regs_out(stage_four_regs)
 );
 
@@ -63,7 +75,8 @@ writeback stage_five
 	.regs_in(stage_four_regs),
 	.rd_data(rd_data),
 	.ld_regfile(ld_regfile),
-	.rd(rd)
+	.rd(rd),
+	.regs_out(stage_five_regs)
 );
 
 endmodule : cpu
