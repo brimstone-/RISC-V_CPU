@@ -27,9 +27,7 @@ fetch stage_one
     .clk, 
 	 .read_a,
 	 .address_a,
-	 .rdata_a,
 	 .resp_a,
-	 .instruction_out(instruction_out),
 	 .regs_in(stage_five_regs),
     .regs_out(stage_one_regs)
 );
@@ -37,7 +35,7 @@ fetch stage_one
 decode stage_two
 (
 	.clk,
-	.rdata_a, // from fetch
+	.rdata_a, // from instruction cache
 	.pc(stage_one_regs.pc), // from fetch
 	.cache_out(data_out), // from wb
 	.ld_regfile(ld_regfile), // from wb

@@ -2,10 +2,9 @@ import rv32i_types::*;
 
 module fetch (
     input logic clk, 
-	 input rv32i_word rdata_a,
 	 output read_a,
-	 output rv32i_word address_a,
 	 input resp_a,
+	 output rv32i_word address_a,
     input stage_regs regs_in,
     output stage_regs regs_out
 ); 
@@ -40,9 +39,6 @@ assign read_a = 1'b1;
 assign out.pc = pc_out;
 assign out.ctrl = regs_in.ctrl;
 assign out.valid = regs_in.valid;
-
-// TODO: for cache, need to pass for iCache
-assign out.rdata_a = rdata_a;
 
 register #($bits(out)) stage_reg (
 	.clk(clk),
