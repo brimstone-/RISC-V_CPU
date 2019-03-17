@@ -13,6 +13,7 @@ rv32i_word cmpmux_out;
 stage_regs regs;
 
 logic br_en;
+logic [31:0] alu_out;
 
 // ALU
 mux2 alumux1
@@ -42,7 +43,7 @@ alu alu
 	.aluop(regs_in.ctrl.aluop),
 	.a(alumux1_out),
 	.b(alumux2_out),
-	.f(regs_out.alu)
+	.f(alu_out)
 );
 
 // CMP
@@ -71,13 +72,13 @@ assign regs.j_imm = regs_in.j_imm;
 assign regs.rd = regs_in.rd;
 assign regs.rs1 = regs_in.rs1;
 assign regs.rs2 = regs_in.rs2;
-assign regs.pc = regs_out.alu;
+assign regs.pc = alu_out;
 assign regs.ctrl = regs_in.ctrl;
 assign regs.br = {{31{1'b0}},br_en};
 assign regs.valid = regs_in.valid;
 assign regs.funct3 = regs_in.funct3;
 
-register #($bits(out)) stage_reg
+register #($bits(regs)) stage_reg
 (
 	 .clk(clk),
     .load(1'b1), 					// always high for now. will be dependedent on mem_resp later

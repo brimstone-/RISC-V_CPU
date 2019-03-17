@@ -30,7 +30,7 @@ assign wmask = regs_in.ctrl.mem_byte_enable;
 assign address_b = regs_in.pc;
 assign wdata = regs_in.alu;
 
-register #($bits(out)) stage_reg (
+register #($bits(regs_in)) stage_reg (
 	.clk(clk),
 	.load(1'b1),
 	.in(regs_in),
