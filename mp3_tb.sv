@@ -7,20 +7,13 @@ timeprecision 1ns;
 
 logic clk;
 
-/* Port A */
-logic read_a;
-logic [31:0] address_a;
-logic resp_a;
-logic [31:0] rdata_a;
-
-/* Port B */
-logic read_b;
-logic write;
-logic [3:0] wmask;
-logic [31:0] address_b;
-logic [31:0] wdata;
-logic resp_b;
-logic [31:0] rdata_b;
+logic pmem_read;
+logic pmem_write;
+rv32i_word pmem_address;
+logic [255:0] pmem_wdata;
+logic pmem_resp;
+logic pmem_error;
+rv32i_word pmem_rdata;
 
 initial
 begin
@@ -67,24 +60,16 @@ mp3 dut
 	.*
 );
 
-magic_memory_dp megic_mem
+physical_memory pmem
 (
     .clk,
-
-    /* Port A */
-    .read_a,
-    .address_a,
-    .resp_a,
-    .rdata_a,
-
-    /* Port B */
-    .read_b,
-    .write,
-    .wmask,
-    .address_b,
-    .wdata,
-    .resp_b,
-    .rdata_b
+    .read(pmem_read),
+    .write(pmem_write),
+    .address(pmem_address),
+    .wdata(pmem_wdata),
+    .resp(pmem_resp),
+    .error(pmem_error),
+    .rdata(pmem_rdata)
 );
 
 endmodule : mp3_tb
