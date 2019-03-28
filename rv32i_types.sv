@@ -66,7 +66,7 @@ typedef struct packed {
 	branch_funct3_t cmpop;
 	logic [3:0] mem_byte_enable;
 	logic write;
-	logic read_a;
+	//logic read_a;
 	logic read_b;
 	logic pcmux_sel;
 	logic alumux1_sel;

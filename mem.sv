@@ -4,6 +4,7 @@ module mem (
 	input logic clk, 
 	input stage_regs regs_in, 
 	
+	input resp_a,
 	input resp_b,
 
 	output logic read_b,
@@ -24,7 +25,7 @@ module mem (
 //assign out.valid = in.valid;
 
 // TODO: pass PC to dCache for WB stage
-assign read_b = 1'b1;
+assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
 assign wmask = regs_in.ctrl.mem_byte_enable;
 assign address_b = regs_in.pc;
@@ -32,7 +33,7 @@ assign wdata = regs_in.alu;
 
 register #($bits(regs_in)) stage_reg (
 	.clk(clk),
-	.load(1'b1),
+	.load(resp_a | resp_b),
 	.in(regs_in),
 	.out(regs_out)
 );

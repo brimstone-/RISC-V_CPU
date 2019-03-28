@@ -5,6 +5,8 @@ module decode
 	input clk,
 	input [31:0] rdata_a,
 	input [31:0] pc,
+	input resp_a,
+	input resp_b,
 	input [31:0] cache_out,
 	input logic ld_regfile,
 	input [4:0] rd,
@@ -21,7 +23,7 @@ logic [2:0] funct3;
 logic [6:0] funct7;
 stage_regs stage;
 
-assign load_all 		= 1;
+assign load_all 		= resp_a | resp_b;
 assign stage.i_imm 	= i;
 assign stage.s_imm 	= s;
 assign stage.b_imm 	= b;

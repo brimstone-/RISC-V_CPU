@@ -34,6 +34,9 @@ fetch stage_one
 	 .read_a,
 	 .address_a,
 	 .resp_a,
+	 .resp_b,
+	 .read_b,
+	 .write,
 	 .regs_in(stage_five_regs),
     .pc
 );
@@ -42,6 +45,8 @@ decode stage_two
 (
 	.clk,
 	.rdata_a, // from instruction cache
+	.resp_a,
+	.resp_b,
 	.pc, // from fetch
 	.cache_out(rd_data), // from wb
 	.ld_regfile(ld_regfile), // from wb
@@ -52,6 +57,8 @@ decode stage_two
 execute stage_three
 (
 	.clk,
+	.resp_a,
+	.resp_b,
 	.regs_in(stage_two_regs),
 	.regs_out(stage_three_regs)
 );
@@ -60,6 +67,7 @@ mem stage_four
 (
 	.clk,
 	.regs_in(stage_three_regs),
+	.resp_a,
 	.resp_b,
 	.read_b,
 	.write,

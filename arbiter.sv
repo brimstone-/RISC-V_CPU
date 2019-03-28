@@ -3,7 +3,7 @@ import rv32i_types::*;
 module arbiter
 (
 	// to both
-	output rv32i_word cache_rdata,
+	output logic [255:0] cache_rdata,
 	
 	// icache
 	output logic pmem_resp_a,
@@ -24,7 +24,7 @@ module arbiter
 	// pmem
 	input pmem_resp,
 	input pmem_error,
-	input rv32i_word pmem_rdata,
+	input [255:0] pmem_rdata,
 	output [255:0] pmem_wdata,
 	output logic pmem_read,
 	output logic pmem_write,

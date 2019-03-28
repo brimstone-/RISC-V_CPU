@@ -13,7 +13,7 @@ rv32i_word pmem_address;
 logic [255:0] pmem_wdata;
 logic pmem_resp;
 logic pmem_error;
-rv32i_word pmem_rdata;
+logic [255:0] pmem_rdata;
 
 initial
 begin

@@ -3,6 +3,8 @@ import rv32i_types::*;
 module execute #(parameter width = 32)
 (
 	input clk,
+	input resp_a,
+	input resp_b,
 	input stage_regs regs_in,
 	output stage_regs regs_out
 );
@@ -82,7 +84,7 @@ assign regs.funct3 = regs_in.funct3;
 register #($bits(regs)) stage_reg
 (
 	 .clk(clk),
-    .load(1'b1), 					// always high for now. will be dependedent on mem_resp later
+    .load(resp_a | resp_b), 					// always high for now. will be dependedent on mem_resp later
     .in(regs),						// struct of things to pass to stage 4
     .out(regs_out)						// values stage 3 holds
 );

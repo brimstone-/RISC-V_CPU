@@ -6,7 +6,7 @@ module mp3
 
 	input pmem_resp,
 	input pmem_error,
-	input rv32i_word pmem_rdata,
+	input [255:0] pmem_rdata,
 
 	output logic pmem_read,
 	output logic pmem_write,
@@ -34,7 +34,7 @@ cpu cpu
 	.*
 );
 
-cache_heirarchy cache
+cache_heirarchy cache_datapath
 (
 	.clk,
 

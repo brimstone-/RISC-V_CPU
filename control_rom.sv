@@ -25,7 +25,7 @@ begin
 	ctrl.cmpmux_sel = 1'b0;
 
 	ctrl.write = 1'b0;
-	ctrl.read_a = 1'b0; //i think this is always one for cp1
+	//ctrl.read_a = 1'b0; //i think this is always one for cp1
 	ctrl.read_b = 1'b0;
 	
 	/* Assign control signals based on opcode */
@@ -68,8 +68,9 @@ begin
 
 		op_load: begin
       	// do we have a rmask?
-				ctrl.regfilemux_sel = 3;
-				ctrl.load_regfile = 1;
+			ctrl.aluop = alu_add;
+			ctrl.regfilemux_sel = 3;
+			ctrl.load_regfile = 1;
 
       	case(load_funct3_t'(funct3))
              lh, lb, lh: ctrl.read_b = 1;
@@ -106,20 +107,20 @@ begin
 		end
 
 		op_imm: begin
-      ctrl.load_regfile = 1;
+			ctrl.load_regfile = 1;
 
 			case (arith_funct3_t'(funct3))
 				slt: begin
-          ctrl.cmpop = blt; // blt for SLTI ,bltu for SLTIU
+					ctrl.cmpop = blt; // blt for SLTI ,bltu for SLTIU
 					ctrl.regfilemux_sel = 1;
 					ctrl.cmpmux_sel = 1; 
-        end
+				end
 
 				sltu: begin
 					ctrl.cmpop = bltu; // blt for SLTI ,bltu for SLTIU
 					ctrl.regfilemux_sel = 1;
 					ctrl.cmpmux_sel = 1; 
-        end
+			  end
 
 				sr: begin
 					if (funct7 == 7'b0100000) begin

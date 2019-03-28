@@ -22,7 +22,7 @@ module cache_heirarchy
 	// pmem
 	input pmem_resp,
 	input pmem_error,
-	input rv32i_word pmem_rdata,
+	input [255:0] pmem_rdata,
 
 	output [255:0] pmem_wdata,
 	output logic pmem_read,
@@ -35,7 +35,7 @@ rv32i_word pmem_address_a, pmem_address_b;
 logic resp_arb_a, resp_arb_b;
 logic pmem_read_a, pmem_read_b, pmem_write_b;
 logic error_arb_a, error_arb_b;
-rv32i_word rdata_arb;
+logic [255:0] rdata_arb;
 
 logic read_i, read_d, write_d;
 logic [255:0] pmem_wdata_b;
@@ -72,7 +72,6 @@ cache dcache
 	.mem_address(address_b),
 	.mem_wdata(wdata),
 	.mem_byte_enable(wmask),
-
 	.mem_resp(resp_b),
 	.mem_rdata(rdata_b),
 
@@ -108,13 +107,13 @@ arbiter arbiter
 	.pmem_wdata_b(pmem_wdata_b),
 	
 	// pmem
-	.pmem_resp,
-	.pmem_error,
-	.pmem_rdata,
-	.pmem_wdata,
-	.pmem_read,
-	.pmem_write,
-	.pmem_address
+	.pmem_resp(pmem_resp),
+	.pmem_error(pmem_error),
+	.pmem_rdata(pmem_rdata),
+	.pmem_wdata(pmem_wdata),
+	.pmem_read(pmem_read),
+	.pmem_write(pmem_write),
+	.pmem_address(pmem_address)
 );
 
 endmodule : cache_heirarchy
