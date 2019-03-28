@@ -27,7 +27,6 @@ module cache_control (
 );
 
 enum int unsigned {
-	idle,
 	check,
 	allocate,
 	writeback
@@ -36,7 +35,7 @@ enum int unsigned {
 always_comb
 begin : state_actions
 	/* Default output assignments */
-	arrays_read = 0;
+	arrays_read = 1;
 
 	dirty_load[0] = 0;
 	dirty_load[1] = 0;
@@ -67,12 +66,6 @@ begin : state_actions
 	pmem_write = 0;
 
 	case(state)
-		idle : begin
-			if (mem_read || mem_write) begin
-				arrays_read = 1;
-			end
-		end
-		
 		check : begin
 			if (mem_read) begin
 				if (hit[0] || hit[1]) begin
@@ -136,17 +129,9 @@ always_comb
 begin : next_state_logic
 	next_state = state;
 	case(state)
-		idle : begin
-			if (mem_read || mem_write) begin
-				next_state = check;
-			end else begin
-				next_state = idle;
-			end
-		end
-
 		check : begin
 			if (hit[0] || hit[1]) begin
-				next_state = idle;
+				next_state = check;
 			end else if ((!lru_out && dirty_out[0]) || (lru_out && dirty_out[1])) begin
 				next_state = writeback;
 			end else begin
@@ -156,7 +141,7 @@ begin : next_state_logic
 
 		allocate : begin
 			if (pmem_resp) begin
-				next_state = idle;
+				next_state = check;
 			end else begin
 				next_state = allocate;
 			end
@@ -164,13 +149,13 @@ begin : next_state_logic
 
 		writeback : begin
 			if (pmem_resp) begin
-				next_state = idle;
+				next_state = check;
 			end else begin
 				next_state = writeback;
 			end
 		end
 
-		default: next_state = idle;
+		default: next_state = check;
 	endcase
 end
 

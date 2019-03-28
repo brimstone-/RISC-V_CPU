@@ -3,19 +3,19 @@ import rv32i_types::*;
 module fetch (
     input clk, 
 	 output logic read_a,
+	 input [31:0] rdata_a,
 	 input resp_a,
 	 input resp_b,
 	 input read_b,
 	 input write,
 	 output rv32i_word address_a,
     input stage_regs regs_in,
-    output rv32i_word pc
-); 
-
-//initial
-//begin
-//    read_a = 1'b1;
-//end
+    output rv32i_word pc,
+	 output rv32i_word instruction,
+	 
+	 input stall_in,
+	 output logic stall_out
+);
 
 stage_regs regs_out;
 rv32i_word pcmux_out;
@@ -32,7 +32,7 @@ mux2 pc_mux (
 
 pc_register pc_reg (
 	.clk(clk),
-	.load(resp_a | resp_b), 
+	.load(stall_in), 
 	.in(pcmux_out),
 	.out(pc_out)
 );
@@ -43,13 +43,20 @@ pc_plus4 pc_plus4 (
 );
 
 assign address_a = pc_out;
-assign read_a = ~read_b & ~write;
+assign read_a = 1'b1;
 
 register stage_reg (
 	.clk(clk),
-	.load(resp_a | resp_b),
+	.load(stall_in),
 	.in(pc_out),
 	.out(pc)
+);
+
+register rdata (
+	.clk,
+	.load(stall_in),
+	.in(rdata_a),
+	.out(instruction)
 );
 
 endmodule: fetch

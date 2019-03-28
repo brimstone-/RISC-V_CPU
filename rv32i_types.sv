@@ -72,6 +72,9 @@ typedef struct packed {
 	logic alumux1_sel;
 	logic [2:0] alumux2_sel;
 	logic cmpmux_sel;
+	logic [1:0] store_type;
+	logic [1:0] load_type;
+	logic load_unsigned;
 } rv32i_control_word;
 
 typedef struct packed {

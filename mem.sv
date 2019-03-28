@@ -6,6 +6,8 @@ module mem (
 	
 	input resp_a,
 	input resp_b,
+	
+	input rv32i_word rdata_b,
 
 	output logic read_b,
 	output logic write,
@@ -13,7 +15,11 @@ module mem (
 	output rv32i_word address_b,
 	output rv32i_word wdata,
 	
-	output stage_regs regs_out
+	output stage_regs regs_out,
+	output rv32i_word dcache_out,
+	
+	input stall_in,
+	output logic stall_out
 ); 
 
 // without cache, we don't do much in this stage right? 
@@ -27,15 +33,25 @@ module mem (
 // TODO: pass PC to dCache for WB stage
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
-assign wmask = regs_in.ctrl.mem_byte_enable;
 assign address_b = regs_in.pc;
 assign wdata = regs_in.alu;
 
+// low most of the tim, so we ~ it, so that everything loads.
+assign stall_out = ~((read_b | write) & ~resp_b);
+
 register #($bits(regs_in)) stage_reg (
 	.clk(clk),
-	.load(resp_a | resp_b),
+	.load(stall_out),
 	.in(regs_in),
 	.out(regs_out)
+);
+
+store_mask mask
+(
+	.store_type(regs_in.ctrl.store_type),
+	.alu_out(regs_in.alu_out[1:0]),
+	.load_unsigned(regs_in.ctrl.load_unsigned),
+	.out(wmask)
 );
 
 endmodule: mem

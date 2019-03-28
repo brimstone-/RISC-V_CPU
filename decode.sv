@@ -3,14 +3,17 @@ import rv32i_types::*;
 module decode
 (
 	input clk,
-	input [31:0] rdata_a,
 	input [31:0] pc,
 	input resp_a,
 	input resp_b,
 	input [31:0] cache_out,
 	input logic ld_regfile,
 	input [4:0] rd,
-	output stage_regs regs_out
+	input rv32i_word instruction,
+	output stage_regs regs_out,
+	
+	input stall_in,
+	output logic stall_out
 );
 
 logic load_all;
@@ -23,7 +26,7 @@ logic [2:0] funct3;
 logic [6:0] funct7;
 stage_regs stage;
 
-assign load_all 		= resp_a | resp_b;
+assign stall_out     = stall_in;
 assign stage.i_imm 	= i;
 assign stage.s_imm 	= s;
 assign stage.b_imm 	= b;
@@ -41,7 +44,7 @@ assign stage.funct3 	= funct3;
 
 ir IR
 (
-	 .in(rdata_a),							// comes from CACHE of stage 1
+	 .in(instruction),					// comes from CACHE of stage 1
     .funct3(funct3),						// goes to control ROM
     .funct7(funct7),						// goes to control ROM
     .opcode(ir_op),						// goes to control ROM
@@ -79,7 +82,7 @@ regfile regfile
 register #($bits(stage)) stage_reg
 (
 	 .clk(clk),
-    .load(load_all), 					// always high for now. will be dependedent on mem_resp later
+    .load(stall_in), 					// always high for now. will be dependedent on mem_resp later
     .in(stage),							// struct of things to pass to stage 3
     .out(regs_out)						// values stage 3 holds
 );

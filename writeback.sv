@@ -2,12 +2,12 @@ import rv32i_types::*;
 
 module writeback #(parameter width = 32)
 (
-	 input [31:0] rdata_b,
+	 input rv32i_word dcache_out,
 	 input stage_regs regs_in,
-	 output [31:0] rd_data,
+	 output logic [31:0] rd_data,
 	 output logic ld_regfile,
-	 output [4:0] rd,
-	 output stage_regs regs_out
+	 output logic [4:0] rd,
+	 output stage_regs regs_out,
 );
 
 logic [31:0] mask_out;
@@ -16,15 +16,11 @@ assign ld_regfile = regs_in.ctrl.load_regfile;
 
 assign regs_out = regs_in;
 
-mem_mask mask
+load_mask mask
 (
-	.funct3(regs_in.funct3),
-	.opcode(regs_in.ctrl.opcode),
-	.mdrreg_out(rdata_b),
-	.rs1_out(regs_in.rs1),
-	.rs2_out(regs_in.rs2),
-	.i_imm(regs_in.i_imm),
-	.s_imm(regs_in.s_imm),
+	.in(dcache_out),
+	.load_type(regs_in.ctrl.load_type)
+	.alu_out(regs_in.alu_out),
 	.out(mask_out)
 );
 

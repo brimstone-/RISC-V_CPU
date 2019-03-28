@@ -6,7 +6,10 @@ module execute #(parameter width = 32)
 	input resp_a,
 	input resp_b,
 	input stage_regs regs_in,
-	output stage_regs regs_out
+	output stage_regs regs_out,
+	
+	input stall_in,
+	output logic stall_out
 );
 
 rv32i_word alumux1_out, alumux2_out;
@@ -81,10 +84,12 @@ assign regs.br = {{31{1'b0}},br_en};
 assign regs.valid = regs_in.valid;
 assign regs.funct3 = regs_in.funct3;
 
+assign stall_out = stall_in;
+
 register #($bits(regs)) stage_reg
 (
 	 .clk(clk),
-    .load(resp_a | resp_b), 					// always high for now. will be dependedent on mem_resp later
+    .load(stall_in), 					// always high for now. will be dependedent on mem_resp later
     .in(regs),						// struct of things to pass to stage 4
     .out(regs_out)						// values stage 3 holds
 );

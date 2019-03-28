@@ -23,6 +23,10 @@ begin
 	ctrl.alumux1_sel = 1'b0;
 	ctrl.alumux2_sel = 3'b000;
 	ctrl.cmpmux_sel = 1'b0;
+	
+	ctrl.store_type = 1'b0; // sw by default
+	ctrl.load_type = 1'b0; // lw by default
+	ctrl.load_unsigned = 1'b0; 
 
 	ctrl.write = 1'b0;
 	//ctrl.read_a = 1'b0; //i think this is always one for cp1
@@ -71,9 +75,19 @@ begin
 			ctrl.aluop = alu_add;
 			ctrl.regfilemux_sel = 3;
 			ctrl.load_regfile = 1;
-
+			ctrl.read_b = 1;
       	case(load_funct3_t'(funct3))
-             lh, lb, lh: ctrl.read_b = 1;
+             lw: ctrl.load_type = 0;
+				 lb: ctrl.load_type = 1;
+				 lh: ctrl.load_type = 2;
+				 lbu: begin
+					ctrl.load_unsigned = 1; 
+					ctrl.load_type = 1;
+				 end
+				 lhu: begin
+					ctrl.load_unsigned = 1; 
+					ctrl.load_type = 2;
+				 end
 				 default: ;
         endcase 
         ctrl.aluop = alu_add;
@@ -84,25 +98,11 @@ begin
         ctrl.aluop = alu_add;
         ctrl.write = 1;
         ctrl.load_regfile = 1;
-        case(store_funct3_t'(funct3))
-            sb  : begin
-              case(s_imm[1:0])
-                2'b00 : ctrl.mem_byte_enable = 4'b0001;
-                2'b01 : ctrl.mem_byte_enable = 4'b0010;
-                2'b10 : ctrl.mem_byte_enable = 4'b0100;
-                2'b11 : ctrl.mem_byte_enable = 4'b1000;
-                default : ctrl.mem_byte_enable = 4'b1111;
-              endcase
-            end
-            sh  : begin
-              case(s_imm[1:0])
-                2'b00 : ctrl.mem_byte_enable = 4'b0011;
-                2'b10 : ctrl.mem_byte_enable = 4'b1100;
-                default : ctrl.mem_byte_enable = 4'b1111;
-              endcase
-            end
-            sw  : ctrl.mem_byte_enable = 4'b1111;
-            default : ctrl.mem_byte_enable = 4'bxxxx;
+        case(store_funct3_t'(funct3)) // send along what store type the instruction is so mem can gen mask
+		      sw : ctrl.store_type = 0;
+            sb : ctrl.store_type = 1;
+            sh : ctrl.store_type = 2;
+            default : ;
         endcase
 		end
 
