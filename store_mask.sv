@@ -1,7 +1,7 @@
 module store_mask
 (
-	input [1:0] store_type
-	input [1:0] alu_out
+	input [1:0] store_type,
+	input [1:0] alu_out,
 	output logic [3:0] out
 );
 
@@ -21,7 +21,7 @@ mux4 #(.width(4)) byte_mux
 	.f(byte_mux_out)
 );
 
-mux2 #(.width(4)) half_mux_out
+mux2 #(.width(4)) half_mux
 (
 	.sel(alu_out[1]),
 	.a(4'b0011),

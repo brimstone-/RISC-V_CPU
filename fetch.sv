@@ -12,9 +12,7 @@ module fetch (
     input stage_regs regs_in,
     output rv32i_word pc,
 	 output rv32i_word instruction,
-	 
-	 input stall_in,
-	 output logic stall_out
+	 input stall_in
 );
 
 stage_regs regs_out;
@@ -37,10 +35,9 @@ pc_register pc_reg (
 	.out(pc_out)
 );
 
-pc_plus4 pc_plus4 (
-	.in(pc_out), 
-	.out(pc_plus4_out)
-);
+
+assign pc_plus4_out = pc_out + 4;
+
 
 assign address_a = pc_out;
 assign read_a = 1'b1;

@@ -7,7 +7,7 @@ module writeback #(parameter width = 32)
 	 output logic [31:0] rd_data,
 	 output logic ld_regfile,
 	 output logic [4:0] rd,
-	 output stage_regs regs_out,
+	 output stage_regs regs_out
 );
 
 logic [31:0] mask_out;
@@ -16,11 +16,12 @@ assign ld_regfile = regs_in.ctrl.load_regfile;
 
 assign regs_out = regs_in;
 
-load_mask mask
+load_mask load_mask
 (
 	.in(dcache_out),
-	.load_type(regs_in.ctrl.load_type)
-	.alu_out(regs_in.alu_out),
+	.load_type(regs_in.ctrl.load_type),
+	.load_unsigned(regs_in.ctrl.load_unsigned),
+	.alu_out(regs_in.alu),
 	.out(mask_out)
 );
 

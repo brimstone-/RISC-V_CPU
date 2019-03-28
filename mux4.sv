@@ -12,7 +12,7 @@ begin
 		2'b01 : f = b;
 		2'b10 : f = c;
 		2'b11 : f = d;
-		default : f = 32'hxxxxxxxx;
+		default : f = {width{1'bx}};
 	endcase
 end
 

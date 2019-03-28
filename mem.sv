@@ -46,12 +46,19 @@ register #($bits(regs_in)) stage_reg (
 	.out(regs_out)
 );
 
-store_mask mask
+store_mask store_mask
 (
 	.store_type(regs_in.ctrl.store_type),
-	.alu_out(regs_in.alu_out[1:0]),
-	.load_unsigned(regs_in.ctrl.load_unsigned),
+	.alu_out(regs_in.alu[1:0]),
 	.out(wmask)
+);
+
+register rdata
+(
+	.clk,
+	.load(resp_b),
+	.in(rdata_b),
+	.out(dcache_out)
 );
 
 endmodule: mem

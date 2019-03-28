@@ -12,8 +12,7 @@ module decode
 	input rv32i_word instruction,
 	output stage_regs regs_out,
 	
-	input stall_in,
-	output logic stall_out
+	input stall_in
 );
 
 logic load_all;
@@ -26,7 +25,6 @@ logic [2:0] funct3;
 logic [6:0] funct7;
 stage_regs stage;
 
-assign stall_out     = stall_in;
 assign stage.i_imm 	= i;
 assign stage.s_imm 	= s;
 assign stage.b_imm 	= b;

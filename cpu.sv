@@ -24,7 +24,7 @@ stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, st
 
 logic ld_regfile;
 logic [4:0] rd;
-logic stall_one, stall_two, stall_three, stall_four;
+logic stall_three, stall_four;
 
 rv32i_word rd_data;
 rv32i_word pc;
@@ -44,8 +44,7 @@ fetch stage_one
 	 .regs_in(stage_five_regs),
     .pc,
 	 .instruction,
-	 .stall_in(stall_four),
-	 .stall_out(stall_one)
+	 .stall_in(stall_four)
 );
 
 decode stage_two
@@ -59,8 +58,7 @@ decode stage_two
 	.ld_regfile(ld_regfile), // from wb
 	.rd(rd), // from wb
 	.regs_out(stage_two_regs),
-	.stall_in(stall_three),
-	.stall_out(stall_two)
+	.stall_in(stall_three)
 );
 
 execute stage_three
@@ -88,7 +86,7 @@ mem stage_four
 	.wdata,
 	.dcache_out,
 	.regs_out(stage_four_regs),
-	.stall_in(stall_five),
+	.stall_in(),
 	.stall_out(stall_four)
 );
 
