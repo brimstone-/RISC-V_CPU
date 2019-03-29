@@ -65,9 +65,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE array.sv
 set_global_assignment -name SYSTEMVERILOG_FILE bus_adapter.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cache.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cache_control.sv
-set_global_assignment -name SYSTEMVERILOG_FILE cache_datapath.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cache_heirarchy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
@@ -80,7 +77,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE ir.sv
 set_global_assignment -name SYSTEMVERILOG_FILE line_adapter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE load_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mem_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3_tb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE pc_reg.sv
@@ -91,7 +87,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rv32i_types.sv
 set_global_assignment -name SYSTEMVERILOG_FILE store_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE writeback.sv
-set_global_assignment -name SYSTEMVERILOG_FILE mux2_1hot.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mux2.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mux4.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mux8.sv
