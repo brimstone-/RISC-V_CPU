@@ -6,18 +6,18 @@ module cpu
 
 	// port A
 	output logic read_a,
-	output logic [31:0] address_a,
+	output rv32i_word address_a,
 	input resp_a,
-	input [31:0] rdata_a,
+	input rv32i_word rdata_a,
 	
 	// port B
 	output logic read_b,
 	output logic write,
 	output logic [3:0] wmask,
-	output logic [31:0] address_b,
-	output logic [31:0] wdata,
+	output rv32i_word address_b,
+	output rv32i_word wdata,
 	input resp_b,
-	input [31:0] rdata_b
+	input rv32i_word rdata_b
 );
 
 stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, stage_five_regs;
@@ -38,9 +38,6 @@ fetch stage_one
 	 .rdata_a,
 	 .address_a,
 	 .resp_a,
-	 .resp_b,
-	 .read_b,
-	 .write,
 	 .regs_in(stage_five_regs),
     .pc,
 	 .instruction,

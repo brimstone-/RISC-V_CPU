@@ -90,6 +90,7 @@ begin : state_actions
 		
 		allocate : begin
 			pmem_read = 1;
+			arrays_read = 0;
 			if (lru_out) begin
 				dirty_load[1] = 1;
 				dirty_in[1] = 0;
@@ -110,6 +111,7 @@ begin : state_actions
 		end
 		
 		writeback : begin
+			arrays_read = 0;
 			pmem_write = 1;
 			pmem_addr_mux_sel = 1;
 			if (dirty_out[0]) begin
@@ -130,12 +132,12 @@ begin : next_state_logic
 	next_state = state;
 	case(state)
 		check : begin
-			if (hit[0] || hit[1]) begin
-				next_state = check;
-			end else if ((!lru_out && dirty_out[0]) || (lru_out && dirty_out[1])) begin
+			if (((!lru_out & dirty_out[0]) || (lru_out & dirty_out[1])) & (mem_read | mem_write)) begin
 				next_state = writeback;
-			end else begin
+			end else if (mem_read | mem_write) begin
 				next_state = allocate;
+			end else begin
+				next_state = check;
 			end
 		end
 

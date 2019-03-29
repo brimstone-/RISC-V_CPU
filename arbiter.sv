@@ -44,12 +44,12 @@ mux2 #(.width(1)) read_mux
 assign pmem_write = pmem_write_b & ~pmem_read_a;
 
 // error
-assign pmem_error_b = pmem_error & (~pmem_read_a & (pmem_read_b | pmem_write_b));
 assign pmem_error_a = pmem_error & pmem_read_a;
+assign pmem_error_b = pmem_error & (~pmem_read_a & (pmem_read_b | pmem_write_b));
 
 // resp
-assign pmem_resp_b = pmem_resp & (~pmem_read_a & (pmem_read_b | pmem_write_b));
 assign pmem_resp_a = pmem_resp & pmem_read_a;
+assign pmem_resp_b = pmem_resp & (~pmem_read_a & (pmem_read_b | pmem_write_b));
 
 // rdata
 assign cache_rdata = pmem_rdata;

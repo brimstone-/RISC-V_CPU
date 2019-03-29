@@ -21,7 +21,7 @@ load_mask load_mask
 	.in(dcache_out),
 	.load_type(regs_in.ctrl.load_type),
 	.load_unsigned(regs_in.ctrl.load_unsigned),
-	.alu_out(regs_in.alu),
+	.alu_out(regs_in.alu[1:0]),
 	.out(mask_out)
 );
 

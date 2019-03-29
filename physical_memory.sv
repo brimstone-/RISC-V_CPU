@@ -56,10 +56,26 @@ begin
         end
 
         busy: begin
-            if ((internal_address != address[26:5]) || (internal_read != read) || (internal_write != write) || (internal_write && (internal_wdata != wdata))) begin
-                $display("Invalid input: Change in input value");
-                next_state = fail;
-            end
+//            if ((internal_address != address[26:5]) || (internal_read != read) || (internal_write != write) || (internal_write && (internal_wdata != wdata))) begin
+//                $display("Invalid input: Change in input value");
+//                next_state = fail;
+//            end
+				if (internal_address != address[26:5]) begin
+					$display("Invalid input: Change in address");
+					next_state = fail;
+				end
+				else if (internal_read != read) begin
+					$display("Invalid input: Change in read");
+					next_state = fail;
+				end
+				else if (internal_write != write) begin
+					$display("Invalid input: Change in write");
+					next_state = fail;
+				end
+				else if (internal_write && (internal_wdata != wdata))  begin
+					$display("Invalid input: Change in wdata");
+					next_state = fail;
+				end
 
             else if (ready == 1) begin
                 if (write)

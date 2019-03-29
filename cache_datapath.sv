@@ -75,7 +75,7 @@ array LRU
 (
     .clk,
     .read(arrays_read),
-    .load(hit_either),
+    .load(hit_either & arrays_read),
     .index(index),
     .datain(hit[0]),
     .dataout(lru_out)

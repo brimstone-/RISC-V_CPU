@@ -84,6 +84,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE mem_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3_tb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE pc_reg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE p_cache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
 set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE register.sv

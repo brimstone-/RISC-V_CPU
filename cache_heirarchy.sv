@@ -41,12 +41,12 @@ logic read_i, read_d, write_d;
 logic [255:0] pmem_wdata_b;
 
 // a
-cache icache
+p_cache icache
 (
 	.clk,
 	.mem_read(read_a),
 	.mem_write(1'b0),
-	.mem_address(address_a),
+	.mem_addr(address_a),
 	.mem_wdata(),
 	.mem_byte_enable(4'b1111),
 
@@ -59,17 +59,17 @@ cache icache
 
 	.pmem_read(pmem_read_a),
 	.pmem_write(),
-	.pmem_address(pmem_address_a),
+	.pmem_addr(pmem_address_a),
 	.pmem_wdata()
 );
 
 // b
-cache dcache
+p_cache dcache
 (
 	.clk,
 	.mem_read(read_b),
 	.mem_write(write),
-	.mem_address(address_b),
+	.mem_addr(address_b),
 	.mem_wdata(wdata),
 	.mem_byte_enable(wmask),
 	.mem_resp(resp_b),
@@ -81,7 +81,7 @@ cache dcache
 
 	.pmem_read(pmem_read_b),
 	.pmem_write(pmem_write_b),
-	.pmem_address(pmem_address_b),
+	.pmem_addr(pmem_address_b),
 	.pmem_wdata(pmem_wdata_b)
 );
 
