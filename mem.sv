@@ -2,7 +2,6 @@ import rv32i_types::*;
 
 module mem (
 	input logic clk, 
-	input reset,
 	input stage_regs regs_in, 
 	
 	input resp_a,
@@ -42,7 +41,7 @@ assign stall_out = ~((read_b | write) & ~resp_b);
 
 register #($bits(regs_in)) stage_reg (
 	.clk(clk),
-	.reset(reset),
+	.reset(1'b0),
 	.load(resp_a && resp_b),
 	.in(regs_in),
 	.out(regs_out)
