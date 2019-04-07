@@ -48,7 +48,7 @@ begin
 		op_jal: begin
 			ctrl.load_regfile = 1;
 			ctrl.regfilemux_sel = 4;
-			//ctrl.pcmux_sel = 1; // fetch stage pcmux
+			ctrl.pcmux_sel = 1; // fetch stage pcmux
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 5;
 			ctrl.aluop = alu_add;
@@ -57,14 +57,14 @@ begin
 		op_jalr: begin
 			ctrl.load_regfile = 1;
 			ctrl.regfilemux_sel = 4;
-			//ctrl.pcmux_sel = 1; // fetch stage pcmux
+			ctrl.pcmux_sel = 1; // fetch stage pcmux
 			ctrl.alumux1_sel = 0;
 			ctrl.alumux2_sel = 0;
 			ctrl.aluop = alu_add;
 		end
 
 		op_br: begin
-      //ctrl.pcmux_sel = br_en;
+         //ctrl.pcmux_sel = br_en;
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 2;
 			ctrl.aluop = alu_add;

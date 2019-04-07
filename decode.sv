@@ -3,6 +3,7 @@ import rv32i_types::*;
 module decode
 (
 	input clk,
+	input reset,
 	input [31:0] pc,
 	input resp_a,
 	input resp_b,
@@ -81,6 +82,7 @@ register #($bits(stage)) stage_reg
 (
 	 .clk(clk),
     .load(stall_in), 					// always high for now. will be dependedent on mem_resp later
+	 .reset(reset),
     .in(stage),							// struct of things to pass to stage 3
     .out(regs_out)						// values stage 3 holds
 );

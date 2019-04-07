@@ -27,7 +27,7 @@ mux2 pc_mux (
 
 pc_register pc_reg (
 	.clk(clk),
-	.load(stall_in & resp_a), 
+	.load(stall_in & resp_a || regs_in.ctrl.pcmux_sel), 
 	.in(pcmux_out),
 	.out(pc_out)
 );
@@ -45,6 +45,7 @@ end
 
 register stage_reg (
 	.clk(clk),
+	.reset(1'b0),
 	.load(stall_in & resp_a),
 	.in(pc_out),
 	.out(pc)
@@ -52,6 +53,7 @@ register stage_reg (
 
 register rdata (
 	.clk,
+	.reset(1'b0),
 	.load(stall_in & resp_a),
 	.in(rdata_a),
 	.out(instruction)
