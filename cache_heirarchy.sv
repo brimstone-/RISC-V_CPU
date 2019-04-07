@@ -67,7 +67,7 @@ p_cache icache
 p_cache dcache
 (
 	.clk,
-	.mem_read(read_b ),
+	.mem_read(read_b),
 	.mem_write(write),
 	.mem_addr(address_b),
 	.mem_wdata(wdata),
