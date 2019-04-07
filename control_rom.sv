@@ -97,7 +97,7 @@ begin
         ctrl.alumux2_sel = 3;
         ctrl.aluop = alu_add;
         ctrl.write = 1;
-        ctrl.load_regfile = 1;
+        // ctrl.load_regfile = 1; 
         case(store_funct3_t'(funct3)) // send along what store type the instruction is so mem can gen mask
 		      sw : ctrl.store_type = 0;
             sb : ctrl.store_type = 1;

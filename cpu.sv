@@ -48,7 +48,7 @@ fetch stage_one
 decode stage_two
 (
 	.clk,
-	.reset(1'b0),
+	.reset(stage_four_regs.ctrl.pcmux_sel),
 	.instruction, // from instruction cache
 	.resp_a,
 	.resp_b,
@@ -63,7 +63,7 @@ decode stage_two
 execute stage_three
 (
 	.clk,
-	.reset(1'b0),
+	.reset(stage_four_regs.ctrl.pcmux_sel),
 	.resp_a,
 	.resp_b,
 	.regs_in(stage_two_regs),
@@ -75,6 +75,7 @@ execute stage_three
 mem stage_four
 (
 	.clk,
+	.reset(stage_four_regs.ctrl.pcmux_sel),
 	.regs_in(stage_three_regs),
 	.resp_a,
 	.resp_b,
