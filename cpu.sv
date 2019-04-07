@@ -38,6 +38,7 @@ fetch stage_one
 	 .rdata_a,
 	 .address_a,
 	 .resp_a,
+	 .resp_b,
 	 .regs_in(stage_five_regs),
     .pc,
 	 .instruction,
@@ -47,7 +48,7 @@ fetch stage_one
 decode stage_two
 (
 	.clk,
-	.reset(stage_four_regs.ctrl.pcmux_sel),
+	.reset(1'b0),
 	.instruction, // from instruction cache
 	.resp_a,
 	.resp_b,
@@ -62,7 +63,7 @@ decode stage_two
 execute stage_three
 (
 	.clk,
-	.reset(stage_four_regs.ctrl.pcmux_sel),
+	.reset(1'b0),
 	.resp_a,
 	.resp_b,
 	.regs_in(stage_two_regs),

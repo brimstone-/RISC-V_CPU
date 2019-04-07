@@ -106,7 +106,7 @@ assign stall_out = stall_in;
 register #($bits(regs)) stage_reg
 (
 	 .clk(clk),
-    .load(stall_in), 					// always high for now. will be dependedent on mem_resp later
+    .load(resp_a && resp_b), 					// always high for now. will be dependedent on mem_resp later
 	 .reset(reset),
     .in(regs),						// struct of things to pass to stage 4
     .out(regs_out)						// values stage 3 holds

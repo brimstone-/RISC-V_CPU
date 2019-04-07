@@ -5,6 +5,7 @@ module fetch (
 	 output logic read_a,
 	 input rv32i_word rdata_a,
 	 input resp_a,
+	 input resp_b,
 	 output rv32i_word address_a,
     input stage_regs regs_in,
     output rv32i_word pc,
@@ -27,7 +28,7 @@ mux2 pc_mux (
 
 pc_register pc_reg (
 	.clk(clk),
-	.load(stall_in & resp_a || regs_in.ctrl.pcmux_sel), 
+	.load(resp_b & resp_a), 
 	.in(pcmux_out),
 	.out(pc_out)
 );
