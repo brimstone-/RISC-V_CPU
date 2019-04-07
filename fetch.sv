@@ -38,6 +38,9 @@ assign pc_plus4_out = pc_out + 4;
 
 
 assign address_a = pc_out;
+initial begin
+	read_a = 1;
+end
 
 always_ff @(posedge clk)
 begin
