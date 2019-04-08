@@ -2,6 +2,7 @@ import rv32i_types::*;
 
 module mem (
 	input logic clk,
+
 	input reset,
 	input stage_regs regs_in, 
 	

@@ -16,7 +16,7 @@ begin
 		3'b101 : out = f;
 		3'b110 : out = g;
 		3'b111 : out = h;
-		default : out = 32'hxxxxxxxx;
+		default : out = {width{1'bx}};
 	endcase
 end
 

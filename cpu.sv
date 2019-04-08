@@ -20,6 +20,7 @@ module cpu
 	input rv32i_word rdata_b
 );
 
+
 stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, stage_five_regs;
 stage_regs stage_two_regs_comb;
 
