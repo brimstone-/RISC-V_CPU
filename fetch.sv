@@ -10,7 +10,9 @@ module fetch (
     input stage_regs regs_in,
     output rv32i_word pc,
 	 output rv32i_word instruction,
-	 input stall_in
+	 input stall_in,
+	 input ex_fetch_haz,
+	 input rv32i_word exec_forward
 );
 
 stage_regs regs_out;
@@ -19,13 +21,24 @@ rv32i_word pc_out;
 
 rv32i_word pc_plus4_out;
 
-mux2 pc_mux (
+mux2 pc_mux
+(
 	.sel(regs_in.ctrl.pcmux_sel),
 	.a(pc_plus4_out),
 	.b(regs_in.pc),
 	.f(pcmux_out)
 );
 
+/*
+mux4 pc_mux (
+	.sel({ex_fetch_haz & regs_in.br[0], regs_in.ctrl.pcmux_sel}),
+	.a(pc_plus4_out),
+	.b(regs_in.pc),
+	.c(exec_forward),
+	.d(exec_forward),
+	.f(pcmux_out)
+);
+*/
 pc_register pc_reg (
 	.clk(clk),
 	.load(resp_b & resp_a), 

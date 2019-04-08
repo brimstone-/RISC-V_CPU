@@ -12,8 +12,14 @@ module decode
 	input [4:0] rd,
 	input rv32i_word instruction,
 	output stage_regs regs_out,
+	output stage_regs regs_out_comb,
 	
-	input stall_in
+	input stall_in,
+	
+	input ex_dec_haz [3],
+	input mem_dec_haz [2],
+	input rv32i_word exec_forward,
+	input rv32i_word mem_forward
 );
 
 logic load_all;
@@ -32,14 +38,38 @@ assign stage.b_imm 	= b;
 assign stage.u_imm 	= u;
 assign stage.j_imm 	= j;
 assign stage.rd 		= reg_rd;
-assign stage.rs1 		= reg_a;
-assign stage.rs2 		= reg_b;
+//assign stage.rs1 		= reg_a;
+assign stage.rs1_num = src_a;
+//assign stage.rs2 		= reg_b;
+assign stage.rs2_num = src_b;
 assign stage.pc		= pc;
 assign stage.ctrl 	= ctrl;
 assign stage.valid 	= 1;
 assign stage.alu 		= 32'bz;
 assign stage.br		= 32'bz;
 assign stage.funct3 	= funct3;
+
+assign regs_out_comb = stage;
+
+mux4 rs1_mux
+(
+	.sel({(ex_dec_haz[0] | ex_dec_haz[2]), mem_dec_haz[0]}),
+	.a(reg_a),
+	.b(mem_forward),
+	.c(exec_forward),
+	.d(exec_forward),
+	.f(stage.rs1)
+);
+
+mux4 rs2_mux
+(
+	.sel({mem_dec_haz[1],ex_dec_haz[1]}),
+	.a(reg_b),
+	.b(exec_forward),
+	.c(mem_forward),
+	.d(mem_forward),
+	.f(stage.rs2)
+);
 
 ir IR
 (

@@ -40,6 +40,7 @@ begin
 		end
 
 		op_auipc: begin
+			ctrl.load_regfile = 1;
 			ctrl.aluop = alu_add;
 			ctrl.alumux1_sel = 1;
 			ctrl.alumux2_sel = 1;
@@ -71,7 +72,7 @@ begin
 		end
 
 		op_load: begin
-      	// do we have a rmask?
+      	//ctrl.alumux1_sel = 1;
 			ctrl.aluop = alu_add;
 			ctrl.regfilemux_sel = 3;
 			ctrl.load_regfile = 1;
