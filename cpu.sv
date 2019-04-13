@@ -63,7 +63,7 @@ fetch stage_one
 	 .address_a,
 	 .resp_a,
 	 .resp_b,
-	 .regs_in(stage_five_regs),
+	 .regs_in(stage_three_regs),
     .pc,
 	 .instruction,
 	 .stall_in(stallreg_in || stall_in)
@@ -72,7 +72,7 @@ fetch stage_one
 decode stage_two
 (
 	.clk,
-	.reset(stage_four_regs.ctrl.pcmux_sel),
+	.reset(stage_three_regs.ctrl.pcmux_sel),
 	.instruction, // from instruction cache
 	.resp_a,
 	.resp_b,
@@ -90,7 +90,7 @@ decode stage_two
 execute stage_three
 (
 	.clk,
-	.reset(stage_four_regs.ctrl.pcmux_sel),
+	.reset(stage_three_regs.ctrl.pcmux_sel),
 	.resp_a,
 	.resp_b,
 	.regs_in(stage_two_regs),
@@ -107,7 +107,7 @@ execute stage_three
 mem stage_four
 (
 	.clk,
-	.reset(stage_four_regs.ctrl.pcmux_sel),
+	.reset(1'b0),
 	.regs_in(stage_three_regs),
 	.resp_a,
 	.resp_b,
