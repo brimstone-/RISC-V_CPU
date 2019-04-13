@@ -26,7 +26,7 @@ stage_regs stage_two_regs_comb;
 
 logic ld_regfile;
 logic [4:0] rd;
-logic stall_three, stall_four;
+logic stall_in,stallreg_in;
 
 rv32i_word rd_data;
 rv32i_word pc;
@@ -35,13 +35,26 @@ rv32i_word dcache_out;
 
 rv32i_word alu_out;
 
-logic ex_fetch_haz;
-logic ex_dec_haz [3];
-logic mem_dec_haz [2];
-logic mem_ex_haz [2];
+logic hazard_wb_mem [2];
+logic hazard_wb_exec [2];
+logic hazard_wb_dec [2];
+logic hazard_mem_exec [2];
+logic hazard_exe_dec [2];
+logic [31:0] wb_mem, wb_dec, wb_exec, mem_exec;
 
 rv32i_word exec_forward;
 rv32i_word mem_forward;
+
+assign stallreg_in = (hazard_exe_dec [0] || hazard_exe_dec[1]) && (stage_two_regs.ctrl.opcode == op_load) && stage_two_regs.valid;
+
+register #(.width(1)) stall_reg
+(
+	.clk,
+	.load(1'b1),
+	.reset(1'b0),
+	.in(stallreg_in),
+	.out(stall_in)
+);
 
 fetch stage_one
 (
@@ -54,9 +67,7 @@ fetch stage_one
 	 .regs_in(stage_five_regs),
     .pc,
 	 .instruction,
-	 .stall_in(stall_four),
-	 .ex_fetch_haz,
-	 .exec_forward
+	 .stall_in(stallreg_in || stall_in)
 );
 
 decode stage_two
@@ -72,11 +83,9 @@ decode stage_two
 	.rd(rd), // from wb
 	.regs_out(stage_two_regs),
 	.regs_out_comb(stage_two_regs_comb),
-	.stall_in(stall_three),
-	.ex_dec_haz,
-	.mem_dec_haz,
-	.exec_forward,
-	.mem_forward
+	.stall_in,
+	.hazard_wb_dec,
+	.wb_dec
 );
 
 execute stage_three
@@ -87,11 +96,13 @@ execute stage_three
 	.resp_b,
 	.regs_in(stage_two_regs),
 	.regs_out(stage_three_regs),
-	.stall_in(stall_four),
-	.stall_out(stall_three),
+	.stall_in(),
+	.stall_out(),
 	.alu_out,
-	.mem_ex_haz,
-	.mem_forward
+	.hazard_mem_exec,
+	.hazard_wb_exec,
+	.wb_exec,
+	.mem_exec
 );
 
 mem stage_four
@@ -110,7 +121,9 @@ mem stage_four
 	.dcache_out,
 	.regs_out(stage_four_regs),
 	.stall_in(),
-	.stall_out(stall_four)
+	.stall_out(),
+	.hazard_wb_mem,
+	.wb_mem
 );
 
 writeback stage_five
@@ -123,22 +136,22 @@ writeback stage_five
 	.regs_out(stage_five_regs)
 );
 
-forward_unit forwarding_unit
+forward forwarding_unit
 (
-	.decode_regs(stage_two_regs_comb),
-	.exec_regs(stage_two_regs),
-	.mem_regs(stage_four_regs),
-	
-	.ex_fetch_haz,
-	.ex_dec_haz,
-	.mem_dec_haz,
-	.mem_ex_haz,
-	
-	.alu_out, // exec val
-	.rdata_b, // mem val
-	
-	.exec_forward,
-	.mem_forward
+	.de(stage_two_regs_comb), 
+	.exe(stage_two_regs), 
+	.mem(stage_three_regs), 
+	.wb(stage_four_regs),
+	.cache_data(rd_data),
+	.hazard_wb_mem,
+	.hazard_wb_exec,
+	.hazard_wb_dec,
+	.hazard_mem_exec,
+	.hazard_exe_dec,
+	.wb_mem, 
+	.wb_exec, 
+	.wb_dec, 
+	.mem_exec
 );
 
 endmodule : cpu

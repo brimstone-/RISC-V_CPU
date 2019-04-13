@@ -16,10 +16,8 @@ module decode
 	
 	input stall_in,
 	
-	input ex_dec_haz [3],
-	input mem_dec_haz [2],
-	input rv32i_word exec_forward,
-	input rv32i_word mem_forward
+	input logic hazard_wb_dec [2],
+	input logic [31:0] wb_dec
 );
 
 logic load_all;
@@ -51,23 +49,19 @@ assign stage.funct3 	= funct3;
 
 assign regs_out_comb = stage;
 
-mux4 rs1_mux
+mux2 rs1_mux
 (
-	.sel({(ex_dec_haz[0] | ex_dec_haz[2]), mem_dec_haz[0]}),
+	.sel(hazard_wb_dec[0]),
 	.a(reg_a),
-	.b(mem_forward),
-	.c(exec_forward),
-	.d(exec_forward),
+	.b(wb_dec),
 	.f(stage.rs1)
 );
 
-mux4 rs2_mux
+mux2 rs2_mux
 (
-	.sel({mem_dec_haz[1],ex_dec_haz[1]}),
+	.sel(hazard_wb_dec[1]),
 	.a(reg_b),
-	.b(exec_forward),
-	.c(mem_forward),
-	.d(mem_forward),
+	.b(wb_dec),
 	.f(stage.rs2)
 );
 
@@ -112,7 +106,7 @@ register #($bits(stage)) stage_reg
 (
 	 .clk(clk),
     .load(resp_a && resp_b), 					// always high for now. will be dependedent on mem_resp later
-	 .reset(reset),
+	 .reset(reset || (stall_in && (resp_b) &&(resp_a))),
     .in(stage),							// struct of things to pass to stage 3
     .out(regs_out)						// values stage 3 holds
 );

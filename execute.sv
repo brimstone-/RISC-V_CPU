@@ -11,43 +11,64 @@ module execute #(parameter width = 32)
 	input stall_in,
 	output logic stall_out,
 	output rv32i_word alu_out,
-	input mem_ex_haz [2],
-	input rv32i_word mem_forward
+	input logic hazard_mem_exec [2],
+	input logic hazard_wb_exec [2],
+	input logic [31:0] wb_exec,
+	input logic [31:0] mem_exec
 );
 
-rv32i_word alumux1_out, alumux2_out;
+rv32i_word alumux1_out, alumux2_out, alu2_val;
 rv32i_word cmpmux_out;
 rv32i_control_word ctrl_in;
 
 stage_regs regs;
+logic [31:0] rs1mux_out, rs2mux_out;
 
 logic br_en;
 //logic [31:0] alu_out;
 
 // ALU
-mux4 alumux1
+mux8 alumux1
 (
-	.sel({mem_ex_haz[0], regs_in.ctrl.alumux1_sel}),
+	.sel({hazard_mem_exec[0], hazard_wb_exec[0], regs_in.ctrl.alumux1_sel}),
 	.a(regs_in.rs1),
 	.b(regs_in.pc),
-	.c(mem_forward),
-	.d(mem_forward),
-	.f(alumux1_out)
+	.c(wb_exec),
+	.d(wb_exec),
+	.e(mem_exec),
+	.f(mem_exec),
+	.g(mem_exec),
+	.h(mem_exec),
+	.out(alumux1_out)
 );
 
-mux8_haz alumux2
+mux8 alumux2
 (
 	.sel(regs_in.ctrl.alumux2_sel),
-	.sel2(mem_ex_haz[1]),
 	.a(regs_in.i_imm),
 	.b(regs_in.u_imm),
 	.c(regs_in.b_imm),
 	.d(regs_in.s_imm),
 	.e(regs_in.rs2),
 	.f(regs_in.j_imm),
-	.g(mem_forward),
+	.g(),
 	.h(),
 	.out(alumux2_out)
+);
+
+logic hazard_mux_sel [4];
+assign hazard_mux_sel[3] = 0;
+assign hazard_mux_sel[2] = 1;
+assign hazard_mux_sel[1] = hazard_wb_exec[1];
+assign hazard_mux_sel[0] = hazard_mem_exec[0];
+lru_one_hot_mux #(.width(32)) hazard_mux
+(
+	.sel(hazard_mux_sel),
+	.a(32'b0),
+	.b(wb_exec),
+	.c(alumux2_out),
+	.d({32{1'bx}}),
+	.f(alu2_val)
 );
 
 alu alu
@@ -59,10 +80,31 @@ alu alu
 );
 
 // CMP
+
+mux4 haz_rs2mux
+(
+	.sel({hazard_mem_exec[1],hazard_wb_exec[1]}),
+	.a(regs_in.rs2),
+	.b(wb_exec),
+	.c(mem_exec),
+	.d(mem_exec),
+	.f(rs2mux_out)
+);
+
+mux4 haz_rs1mux
+(
+	.sel({hazard_mem_exec[0],hazard_wb_exec[0]}),
+	.a(regs_in.rs1),
+	.b(wb_exec),
+	.c(mem_exec),
+	.d(mem_exec),
+	.f(rs1mux_out)
+);
+
 mux2 cmpmux
 (
 	.sel(regs_in.ctrl.cmpmux_sel),
-	.a(regs_in.rs2),
+	.a(rs2mux_out),
 	.b(regs_in.i_imm),
 	.f(cmpmux_out)
 );
@@ -70,7 +112,7 @@ mux2 cmpmux
 cmp cmp_module
 (
 	.cmpop(regs_in.ctrl.cmpop),
-	.a(regs_in.rs1),
+	.a(rs1mux_out),
 	.b(cmpmux_out),
 	.br_en(br_en)
 );

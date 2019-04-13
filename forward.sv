@@ -1,62 +1,88 @@
 import rv32i_types::*;
 
-module forward_unit
+module forward
 (
-	input stage_regs decode_regs,
-	input stage_regs exec_regs,
-	input stage_regs mem_regs,
-	
-	output logic ex_fetch_haz,
-	output logic ex_dec_haz [3],
-	output logic mem_dec_haz [2],
-	output logic mem_ex_haz [2],
-	
-	input rv32i_word alu_out, // exec_regs val
-	input rv32i_word rdata_b, // mem_regs val
-	
-	output rv32i_word exec_forward,
-	output rv32i_word mem_forward
+	input stage_regs de, exe, mem, wb,
+	input logic [31:0] cache_data,
+	output logic hazard_wb_mem [2],
+	output logic hazard_wb_exec [2],
+	output logic hazard_wb_dec [2],
+	output logic hazard_mem_exec [2],
+	output logic hazard_exe_dec [2],
+	output [31:0] wb_mem, wb_exec, wb_dec, mem_exec
+);
+ 
+// WB -> MEM
+// REGISTER VALUE
+forward_unit wb_to_mem
+(
+	.rd(wb.rd),
+	.rd_val(cache_data),
+	.rs1_num(mem.rs1_num),
+	.rs2_num(mem.rs2_num),
+	.opcode(mem.ctrl.opcode),
+	.load_regfile(wb.ctrl.load_regfile),
+	.hazard(hazard_wb_mem),
+	.f(wb_mem)
 );
 
-// branch hazards
-assign ex_fetch_haz   = decode_regs.ctrl.opcode == op_br;
-
-// exec -> decode
-assign ex_dec_haz[1]  = (decode_regs.rs2_num == exec_regs.rd) & (exec_regs.ctrl.load_regfile == 1) & (exec_regs.rd != 0);
-assign ex_dec_haz[0]  = (decode_regs.rs1_num == exec_regs.rd) & (exec_regs.ctrl.load_regfile == 1) & (exec_regs.rd != 0) & 
-									~((decode_regs.ctrl.opcode == op_store) & (exec_regs.ctrl.opcode == op_load));
-
-// exec -> decode special situation	
-assign ex_dec_haz[2]  = (decode_regs.rs1_num == exec_regs.rd) & (exec_regs.ctrl.opcode == op_load) & (exec_regs.rd != 0);
-//assign ex_dec_haz[3]  = 
-
-// mem -> decode
-assign mem_dec_haz[0] = (decode_regs.rs1_num == mem_regs.rd) & (mem_regs.ctrl.load_regfile == 1) & (mem_regs.rd  != 0);
-assign mem_dec_haz[1] = (decode_regs.rs2_num == mem_regs.rd) & (mem_regs.ctrl.load_regfile == 1) & (mem_regs.rd  != 0);
-
-// mem -> exec **
-assign mem_ex_haz[0]  = (exec_regs.rs1_num == mem_regs.rd) & (mem_regs.ctrl.load_regfile == 1) & (mem_regs.rd  != 0);
-assign mem_ex_haz[1]  = (exec_regs.rs2_num == mem_regs.rd) & (mem_regs.ctrl.load_regfile == 1) & (mem_regs.rd  != 0);
-
-//// writeback -> decode **
-//assign wb_dec_haz[0]  = decode_regs.rs1_num == wb_regs.rd;
-//assign wb_dec_haz[1]  = decode_regs.rs2_num == wb_regs.rd;
-//
-//// writeback -> exec **
-//assign wb_ex_haz[0]  = (exec_regs.rs1_num == exec_regs.rd) & (wb_regs.ctrl.load_regfile == 1) & (wb_regs.rd  != 0);
-//assign wb_ex_haz[1]  = (exec_regs.rs2_num == exec_regs.rd) & (wb_regs.ctrl.load_regfile == 1) & (wb_regs.rd  != 0);
-
-// precedence
-
-
-mux2 exec_forward_mux
+// WB -> EXEC
+// REGISTER VALUE
+forward_unit wb_to_exec
 (
-	.sel(ex_dec_haz[0] | ex_fetch_haz),
-	.a(exec_regs.rs1),
-	.b(alu_out),
-	.f(exec_forward)
+	.rd(wb.rd),
+	.rd_val(cache_data),
+	.rs1_num(exe.rs1_num),
+	.rs2_num(exe.rs2_num),
+	.opcode(exe.ctrl.opcode),
+	.load_regfile(wb.ctrl.load_regfile),
+	.hazard(hazard_wb_exec),
+	.f(wb_exec)
 );
 
-assign mem_forward = mem_ex_haz[0] ? mem_regs.alu : rdata_b;
+// WB -> DEC
+// REGISTER VALUE
+forward_unit wb_to_dec
+(
+	.rd(wb.rd),
+	.rd_val(cache_data),
+	.rs1_num(de.rs1_num),
+	.rs2_num(de.rs2_num),
+	.opcode(de.ctrl.opcode),
+	.load_regfile(wb.ctrl.load_regfile),
+	.hazard(hazard_wb_dec),
+	.f(wb_dec)
+);
 
-endmodule : forward_unit
+// MEM -> EXEC
+// ADDRESS
+forward_unit mem_to_exec
+(
+	.rd(mem.rd),
+	.rd_val(mem.alu),
+	.rs1_num(exe.rs1_num),
+	.rs2_num(exe.rs2_num),
+	.opcode(exe.ctrl.opcode),
+	.load_regfile(mem.ctrl.load_regfile),
+	.hazard(hazard_mem_exec),
+	.f(mem_exec)
+);
+
+// EXEC -> DEC
+// used to check the special stalling condition
+forward_unit exec_to_dec
+(
+	.rd(exe.rd),
+	.rd_val(), // leave empty, don't need to forward anything
+	.rs1_num(de.rs1_num), 
+	.rs2_num(de.rs2_num),
+	.opcode(de.ctrl.opcode),
+	.load_regfile(exe.ctrl.load_regfile),
+	.hazard(hazard_exe_dec),
+	.f() // leave empty, don't need to forward anything
+);
+
+
+
+
+endmodule : forward

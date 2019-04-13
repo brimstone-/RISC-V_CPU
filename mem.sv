@@ -19,7 +19,8 @@ module mem (
 	
 	output stage_regs regs_out,
 	output rv32i_word dcache_out,
-	
+	input logic hazard_wb_mem[2],
+	input logic [31:0] wb_mem,
 	input stall_in,
 	output logic stall_out
 ); 
@@ -35,8 +36,14 @@ module mem (
 // TODO: pass PC to dCache for WB stage
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
-assign address_b = regs_in.pc;
 assign wdata = regs_in.rs2;
+mux2 addr_mux
+(
+	.sel(hazard_wb_mem[1]),
+	.a(regs_in.pc),
+	.b(wb_mem),
+	.f(address_b)
+);
 
 // low most of the tim, so we ~ it, so that everything loads.
 assign stall_out = ~((read_b | write) & ~resp_b);
