@@ -57,7 +57,7 @@ begin
 
 		op_jalr: begin
 			ctrl.load_regfile = 1;
-			ctrl.regfilemux_sel = 4;
+			ctrl.regfilemux_sel = 0;
 			ctrl.pcmux_sel = 1; // fetch stage pcmux
 			ctrl.alumux1_sel = 0;
 			ctrl.alumux2_sel = 0;
