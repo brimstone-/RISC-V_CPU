@@ -25,7 +25,7 @@ mux2 pc_mux
 (
 	.sel(regs_in.ctrl.pcmux_sel),
 	.a(pc_plus4_out),
-	.b(regs_in.pc),
+	.b(regs_in.alu),
 	.f(pcmux_out)
 );
 
