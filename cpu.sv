@@ -22,7 +22,6 @@ module cpu
 
 
 stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, stage_five_regs;
-stage_regs stage_two_regs_comb;
 
 logic ld_regfile;
 logic [4:0] rd;
@@ -82,7 +81,7 @@ decode stage_two
 	.ld_regfile(ld_regfile), // from wb
 	.rd(rd), // from wb
 	.regs_out(stage_two_regs),
-	.regs_out_comb(stage_two_regs_comb),
+	.regs_out_comb(stage_one_regs),
 	.stall_in,
 	.hazard_wb_dec,
 	.wb_dec
@@ -138,7 +137,7 @@ writeback stage_five
 
 forward forwarding_unit
 (
-	.de(stage_two_regs_comb), 
+	.de(stage_one_regs), 
 	.exe(stage_two_regs), 
 	.mem(stage_three_regs), 
 	.wb(stage_four_regs),
