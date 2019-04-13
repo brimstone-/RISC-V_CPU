@@ -40,7 +40,7 @@ assign wdata = regs_in.rs2;
 mux2 addr_mux
 (
 	.sel(hazard_wb_mem[1]),
-	.a(regs_in.pc),
+	.a(regs_in.alu),
 	.b(wb_mem),
 	.f(address_b)
 );
