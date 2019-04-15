@@ -10,7 +10,7 @@ module fetch (
     input stage_regs regs_in,
     output rv32i_word pc,
 	 input logic reset_mux,
-	 output rv32i_word instruction,
+	// output rv32i_word instruction,
 	 input stall_in
 	 /* input ex_fetch_haz,
 	 input rv32i_word exec_forward */
