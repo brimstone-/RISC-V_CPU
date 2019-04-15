@@ -34,11 +34,11 @@ mux8 alumux1
 	.a(regs_in.rs1),
 	.b(regs_in.pc),
 	.c(wb_exec),
-	.d(wb_exec),
+	.d(regs_in.pc),
 	.e(mem_exec),
-	.f(mem_exec),
+	.f(regs_in.pc),
 	.g(mem_exec),
-	.h(mem_exec),
+	.h(regs_in.pc),
 	.out(alumux1_out)
 );
 
@@ -59,12 +59,12 @@ mux8 alumux2
 logic hazard_mux_sel [4];
 assign hazard_mux_sel[3] = 0;
 assign hazard_mux_sel[2] = 1;
-assign hazard_mux_sel[1] = hazard_wb_exec[1];
-assign hazard_mux_sel[0] = hazard_mem_exec[0];
+assign hazard_mux_sel[1] = hazard_wb_exec[1] && (regs_in.ctrl.alumux2_sel == 4);
+assign hazard_mux_sel[0] = hazard_mem_exec[1] && (regs_in.ctrl.alumux2_sel == 4);
 lru_one_hot_mux #(.width(32)) hazard_mux
 (
 	.sel(hazard_mux_sel),
-	.a(32'b0),
+	.a(mem_exec),
 	.b(wb_exec),
 	.c(alumux2_out),
 	.d({32{1'bx}}),
@@ -75,7 +75,7 @@ alu alu
 (
 	.aluop(regs_in.ctrl.aluop),
 	.a(alumux1_out),
-	.b(alumux2_out),
+	.b(alu2_val),
 	.f(alu_out)
 );
 

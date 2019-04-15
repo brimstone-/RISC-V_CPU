@@ -26,11 +26,12 @@ stage_regs stage_one_regs, stage_two_regs, stage_three_regs, stage_four_regs, st
 logic ld_regfile;
 logic [4:0] rd;
 logic stall_in,stallreg_in;
-
+logic reset_mux;
 rv32i_word rd_data;
 rv32i_word pc;
 rv32i_word instruction;
 rv32i_word dcache_out;
+logic stall_out;
 
 rv32i_word alu_out;
 
@@ -44,16 +45,18 @@ logic [31:0] wb_mem, wb_dec, wb_exec, mem_exec;
 rv32i_word exec_forward;
 rv32i_word mem_forward;
 
-assign stallreg_in = (hazard_exe_dec [0] || hazard_exe_dec[1]) && (stage_two_regs.ctrl.opcode == op_load) && stage_two_regs.valid;
+assign stallreg_in = (hazard_exe_dec [0] || hazard_exe_dec[1]) && ((stage_two_regs.ctrl.opcode == op_load) || (stage_two_regs.ctrl.opcode == op_lui)) && stage_two_regs.valid;
 
-register #(.width(1)) stall_reg
-(
-	.clk,
-	.load(1'b1),
-	.reset(1'b0),
-	.in(stallreg_in),
-	.out(stall_in)
-);
+
+// apparently this is not necessary??
+//register #(.width(1)) stall_reg
+//(
+//	.clk,
+//	.load(1'b1),
+//	.reset(1'b0),
+//	.in(stallreg_in),
+//	.out(stall_in)
+//);
 
 fetch stage_one
 (
@@ -61,28 +64,30 @@ fetch stage_one
 	 .read_a,
 	 .rdata_a,
 	 .address_a,
+	 .reset_mux(stage_four_regs.ctrl.pcmux_sel),
 	 .resp_a,
-	 .resp_b,
+	 .resp_b(~stall_out),
 	 .regs_in(stage_three_regs),
     .pc,
 	 .instruction,
-	 .stall_in(stallreg_in || stall_in)
+	 .stall_in(stallreg_in)
 );
 
 decode stage_two
 (
 	.clk,
 	.reset(stage_three_regs.ctrl.pcmux_sel),
-	.instruction, // from instruction cache
+//	.reset(1'b0),
+	.instruction(rdata_a), // from instruction cache
 	.resp_a,
-	.resp_b,
+	.resp_b(~stall_out),
 	.pc, // from fetch
 	.cache_out(rd_data), // from wb
 	.ld_regfile(ld_regfile), // from wb
 	.rd(rd), // from wb
 	.regs_out(stage_two_regs),
 	.regs_out_comb(stage_one_regs),
-	.stall_in,
+	.stall_in(stallreg_in),
 	.hazard_wb_dec,
 	.wb_dec
 );
@@ -92,7 +97,7 @@ execute stage_three
 	.clk,
 	.reset(stage_three_regs.ctrl.pcmux_sel),
 	.resp_a,
-	.resp_b,
+	.resp_b(~stall_out),
 	.regs_in(stage_two_regs),
 	.regs_out(stage_three_regs),
 	.stall_in(),
@@ -120,7 +125,7 @@ mem stage_four
 	.dcache_out,
 	.regs_out(stage_four_regs),
 	.stall_in(),
-	.stall_out(),
+	.stall_out,
 	.hazard_wb_mem,
 	.wb_mem
 );

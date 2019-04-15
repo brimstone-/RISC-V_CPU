@@ -7,7 +7,7 @@ module mem (
 	input stage_regs regs_in, 
 	
 	input resp_a,
-	input resp_b,
+	input logic resp_b,
 	
 	input rv32i_word rdata_b,
 
@@ -46,12 +46,13 @@ mux2 addr_mux
 );
 
 // low most of the tim, so we ~ it, so that everything loads.
-assign stall_out = ~((read_b | write) & ~resp_b);
+//assign stall_out = ~((read_b | write) & ~resp_b);
+assign stall_out = (read_b | write) && (resp_b == 0);
 
 register #($bits(regs_in)) stage_reg (
 	.clk(clk),
 	.reset(reset),
-	.load(resp_a && resp_b),
+	.load(resp_a && (~stall_out)),
 	.in(regs_in),
 	.out(regs_out)
 );
@@ -62,12 +63,12 @@ store_mask store_mask
 	.alu_out(regs_in.alu[1:0]),
 	.out(wmask)
 );
-
+//assign dcache_out = rdata_b;
 register rdata
 (
 	.clk,
 	.reset(1'b0),
-	.load(resp_b && resp_a),
+	.load(resp_b),
 	.in(rdata_b),
 	.out(dcache_out)
 );
