@@ -26,7 +26,7 @@ module o_cache #(
 	output logic pmem_write
 );
 
-logic [31:0] mem_address, mem_byte_enable256;
+logic [31:0] mem_address, mem_byte_enable256, pmem_address;
 logic dirty_load [2];
 logic valid_load [2];
 logic data_read;
@@ -39,7 +39,7 @@ logic valid_out [2];
 logic [s_tag-1:0] tag_out [2];
 logic [s_tag-1:0] tag;
 logic [s_index-1:0] index;
-logic read, hit, lru_out, datamux_sel, dirty_in;
+logic read, hit, lru_out, datamux_sel, dirty_in, pmem_r, pmem_w;
 logic [1:0] writemux_sel [2];
 logic [s_line-1:0] mem_wdata256, mem_rdata256;
 
@@ -137,7 +137,43 @@ mux2 #(.width(s_line)) data_out_mux
 	.f(mem_rdata256)
 );
 
-assign pmem_wdata = mem_rdata256;
+register #(.width(s_line)) pmem_wdata_reg
+(
+	.clk,
+	.load(read),
+	.reset(pmem_resp),
+	.in(mem_rdata256),
+	.out(pmem_wdata)
+);
+
+register pmem_address_reg
+(
+	.clk,
+	.load(read),
+	.reset(pmem_resp),
+	.in(pmem_address),
+	.out(pmem_addr)
+);
+
+register #(.width(1)) pmem_read_reg
+(
+	.clk,
+	.load(read),
+	.reset(pmem_resp),
+	.in(pmem_r),
+	.out(pmem_read)
+);
+
+register #(.width(1)) pmem_write_reg
+(
+	.clk,
+	.load(read),
+	.reset(pmem_resp),
+	.in(pmem_w),
+	.out(pmem_write)
+);
+
+//assign pmem_wdata = mem_rdata256;
 
 bus_adapter adapter 
 (
@@ -189,9 +225,9 @@ always_comb
 begin : state_actions
 	mem_resp = 0;
 	data_read = 0;
-	pmem_addr = {32{1'bz}};
-	pmem_read = 0;
-	pmem_write = 0;
+	pmem_address = {32{1'bz}};
+	pmem_r = 0;
+	pmem_w = 0;
 	writemux_sel[0] = 0;
 	writemux_sel[1] = 0;
 	datamux_sel = 1'bx;
@@ -204,9 +240,12 @@ begin : state_actions
 		check_tag:
 		begin
 			mem_resp = hit && read;
-			if(hit)
+			if(read)
 			begin
 				data_read = 1;
+			end
+			if(hit)
+			begin
 				datamux_sel = hit_way[1];
 				if(mem_write)
 				begin
@@ -218,8 +257,8 @@ begin : state_actions
 		end
 		allocate:
 		begin
-			pmem_read = 1;
-			pmem_addr = {{mem_address[31:5]},{5'b0}};
+			pmem_r = 1;
+			pmem_address = {{mem_address[31:5]},{5'b0}};
 			if(pmem_resp)
 			begin
 				writemux_sel[lru_out] = 2;
@@ -229,10 +268,9 @@ begin : state_actions
 		end
 		write_back:
 		begin
-			pmem_write = 1;
-			data_read = 1;
+			pmem_w = 1;
 			datamux_sel = lru_out;
-			pmem_addr = {{tag_out[lru_out]},{mem_address[s_index + 4:5]},{5'b0}};
+			pmem_address = {{tag_out[lru_out]},{mem_address[s_index + 4:5]},{5'b0}};
 		end
 	endcase
 end
