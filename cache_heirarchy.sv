@@ -41,7 +41,7 @@ logic read_i, read_d, write_d;
 logic [255:0] pmem_wdata_b;
 
 // a
-p_cache icache
+o_cache icache
 (
 	.clk,
 	.mem_read(read_a),
@@ -64,7 +64,7 @@ p_cache icache
 );
 
 // b
-p_cache dcache
+o_cache dcache
 (
 	.clk,
 	.mem_read(read_b ),
