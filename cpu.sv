@@ -69,7 +69,7 @@ fetch stage_one
 	 .resp_b(~stall_out),
 	 .regs_in(stage_three_regs),
     .pc,
-	 .instruction,
+	 //.instruction,
 	 .stall_in(stallreg_in)
 );
 
