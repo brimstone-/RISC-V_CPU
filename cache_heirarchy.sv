@@ -35,6 +35,10 @@ rv32i_word pmem_address_a, pmem_address_b;
 logic resp_arb_a, resp_arb_b;
 logic pmem_read_a, pmem_read_b, pmem_write_b;
 logic error_arb_a, error_arb_b;
+logic arb_pmem_resp, arb_pmem_read, arb_pmem_write;
+logic [31:0] arb_pmem_address;
+logic [255:0] arb_pmem_rdata, arb_pmem_wdata;
+
 logic [255:0] rdata_arb;
 
 logic read_i, read_d, write_d;
@@ -107,13 +111,13 @@ arbiter arbiter
 	.pmem_wdata_b(pmem_wdata_b),
 	
 	// pmem
-	.pmem_resp(pmem_resp),
-	.pmem_error(pmem_error),
-	.pmem_rdata(pmem_rdata),
-	.pmem_wdata(pmem_wdata),
-	.pmem_read(pmem_read),
-	.pmem_write(pmem_write),
-	.pmem_address(pmem_address)
+	.pmem_resp,
+	.pmem_error,
+	.pmem_rdata,
+	.pmem_wdata, // should hook up as full liney
+	.pmem_read,
+	.pmem_write,
+	.pmem_address
 );
 
 endmodule : cache_heirarchy

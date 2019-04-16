@@ -29,7 +29,7 @@ module o_cache #(
 logic [31:0] mem_address, mem_byte_enable256, pmem_address;
 logic dirty_load [2];
 logic valid_load [2];
-logic data_read;
+logic data_read, pmem_load;
 logic dirty_out [2];
 logic [31:0] write_en [2];
 logic [s_line-1:0] data_in [2];
@@ -137,10 +137,12 @@ mux2 #(.width(s_line)) data_out_mux
 	.f(mem_rdata256)
 );
 
+assign pmem_load = read && (mem_address == mem_addr);
+
 register #(.width(s_line)) pmem_wdata_reg
 (
 	.clk,
-	.load(read),
+	.load(pmem_load),
 	.reset(pmem_resp),
 	.in(mem_rdata256),
 	.out(pmem_wdata)
@@ -149,7 +151,7 @@ register #(.width(s_line)) pmem_wdata_reg
 register pmem_address_reg
 (
 	.clk,
-	.load(read),
+	.load(pmem_load),
 	.reset(pmem_resp),
 	.in(pmem_address),
 	.out(pmem_addr)
@@ -158,7 +160,7 @@ register pmem_address_reg
 register #(.width(1)) pmem_read_reg
 (
 	.clk,
-	.load(read),
+	.load(pmem_load),
 	.reset(pmem_resp),
 	.in(pmem_r),
 	.out(pmem_read)
@@ -167,7 +169,7 @@ register #(.width(1)) pmem_read_reg
 register #(.width(1)) pmem_write_reg
 (
 	.clk,
-	.load(read),
+	.load(pmem_load),
 	.reset(pmem_resp),
 	.in(pmem_w),
 	.out(pmem_write)
