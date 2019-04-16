@@ -34,6 +34,7 @@ cpu cpu
 	.*
 );
 
+//cache_heirarchy cache_heirarchy
 mem_heirarchy mem_heirarchy
 (
 	.clk,
@@ -54,6 +55,7 @@ mem_heirarchy mem_heirarchy
 	.rdata_b,
 	
 	// pmem
+	//.pmem_error,
 	.pmem_resp,
 	.pmem_rdata,
 	.pmem_wdata,
@@ -61,5 +63,7 @@ mem_heirarchy mem_heirarchy
 	.pmem_write,
 	.pmem_address
 );
+
+
 
 endmodule : mp3

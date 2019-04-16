@@ -42,7 +42,10 @@ logic [1:0] addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
 logic load_type;
+logic addr_hit;
 logic [1:0] transaction_type_in, transaction_type_out;
+
+assign addr_hit = pre_addr_a == cache_addr_a;
 
 mux4 addr_mux
 (
@@ -171,7 +174,10 @@ begin : state_actions
 				0: arb_resp_a = 1;
 				1: arb_resp_b = 1;
 				2: arb_ewb_resp = 1;
-				3: arb_pre_resp = 1;
+				3: begin
+					arb_pre_resp = 1;
+					if (cache_read_a & addr_hit) arb_resp_a = 1;
+				end
 				default: ;
 			endcase // transaction_type_out
 		end
