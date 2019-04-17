@@ -137,7 +137,7 @@ mux2 #(.width(s_line)) data_out_mux
 	.f(mem_rdata256)
 );
 
-assign pmem_load = read && (mem_address == mem_addr);
+assign pmem_load = read;
 
 register #(.width(s_line)) pmem_wdata_reg
 (
@@ -260,7 +260,7 @@ begin : state_actions
 		allocate:
 		begin
 			pmem_r = 1;
-			pmem_address = {{mem_address[31:5]},{5'b0}};
+			pmem_address = {{mem_addr[31:5]},{5'b0}};
 			if(pmem_resp)
 			begin
 				writemux_sel[lru_out] = 2;
@@ -272,7 +272,7 @@ begin : state_actions
 		begin
 			pmem_w = 1;
 			datamux_sel = lru_out;
-			pmem_address = {{tag_out[lru_out]},{mem_address[s_index + 4:5]},{5'b0}};
+			pmem_address = {{tag_out[lru_out]},{mem_addr[s_index + 4:5]},{5'b0}};
 		end
 	endcase
 end

@@ -36,10 +36,19 @@ module mem (
 // TODO: pass PC to dCache for WB stage
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
-assign wdata = regs_in.rs2;
-mux2 addr_mux
+//assign wdata = regs_in.rs2;
+assign address_b = regs_in.alu;
+mux2 wdata_mux
 (
 	.sel(hazard_wb_mem[1]),
+	.a(regs_in.rs2),
+	.b(wb_mem),
+	.f(wdata)
+);
+
+mux2 addr_mux
+(
+	.sel(hazard_wb_mem[0]),
 	.a(regs_in.alu),
 	.b(wb_mem),
 	.f(address_b)
