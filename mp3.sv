@@ -35,6 +35,7 @@ cpu cpu
 );
 
 cache_heirarchy cache_datapath
+//mem_heirarchy mem_heirarchy
 (
 	.clk,
 
@@ -55,7 +56,7 @@ cache_heirarchy cache_datapath
 	
 	// pmem
 	.pmem_resp,
-	.pmem_error,
+	//.pmem_error,
 	.pmem_rdata,
 	.pmem_wdata,
 	.pmem_read,

@@ -46,13 +46,13 @@ mux2 wdata_mux
 	.f(wdata)
 );
 
-mux2 addr_mux
-(
-	.sel(hazard_wb_mem[0]),
-	.a(regs_in.alu),
-	.b(wb_mem),
-	.f(address_b)
-);
+//mux2 addr_mux
+//(
+//	.sel(hazard_wb_mem[0]),
+//	.a(regs_in.alu),
+//	.b(wb_mem),
+//	.f(address_b)
+//);
 
 // low most of the tim, so we ~ it, so that everything loads.
 //assign stall_out = ~((read_b | write) & ~resp_b);
