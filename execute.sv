@@ -117,6 +117,26 @@ cmp cmp_module
 	.br_en(br_en)
 );
 
+mux4	mux_rs1
+(
+	.sel({{hazard_mem_exec[0]},{hazard_wb_exec[0]}}),
+	.a(regs_in.rs1),
+	.b(wb_exec),
+	.c(mem_exec),
+	.d(mem_exec),
+	.f(regs.rs1)
+);
+
+mux4	mux_rs2
+(
+	.sel({{hazard_mem_exec[1]},{hazard_wb_exec[1]}}),
+	.a(regs_in.rs2),
+	.b(wb_exec),
+	.c(mem_exec),
+	.d(mem_exec),
+	.f(regs.rs2)
+);
+
 // stage_regs value passing
 assign regs.i_imm = regs_in.i_imm;
 assign regs.s_imm = regs_in.s_imm;
@@ -124,9 +144,9 @@ assign regs.b_imm = regs_in.b_imm;
 assign regs.u_imm = regs_in.u_imm;
 assign regs.j_imm = regs_in.j_imm;
 assign regs.rd = regs_in.rd;
-assign regs.rs1 = regs_in.rs1;
+//assign regs.rs1 = regs_in.rs1;
 assign regs.rs1_num = regs_in.rs1_num;
-assign regs.rs2 = regs_in.rs2;
+//assign regs.rs2 = regs_in.rs2;
 assign regs.rs2_num = regs_in.rs2_num;
 assign regs.alu = alu_out;
 assign regs.pc = regs_in.pc;

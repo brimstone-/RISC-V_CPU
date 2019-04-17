@@ -77,7 +77,7 @@ register rdata
 (
 	.clk,
 	.reset(1'b0),
-	.load(resp_b),
+	.load(1'b1),
 	.in(rdata_b),
 	.out(dcache_out)
 );
