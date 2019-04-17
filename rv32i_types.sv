@@ -96,6 +96,15 @@ typedef struct packed {
 	logic [2:0] funct3;
 } stage_regs;
 
+typedef struct packed {
+	logic [31:0] mem_address;
+	logic [31:0] mem_byte_enable;
+	logic [255:0] mem_wdata;
+	logic valid;
+	logic mem_write;
+	logic mem_read;
+} cache_regs;
+
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
 typedef logic [3:0] rv32i_mem_wmask;
