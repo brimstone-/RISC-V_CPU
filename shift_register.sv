@@ -32,6 +32,8 @@ begin
 			valid[i-1] = valid[i];
 			data[i-1] = data[i];
 		end
+		valid[size-1] = 0;
+		data[size-1] = {32{1'b0}};
 	end
 	if(load)
 	begin
