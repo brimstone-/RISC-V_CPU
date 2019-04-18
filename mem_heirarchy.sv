@@ -64,6 +64,14 @@ rv32i_word pre_addr_a;
 logic [255:0] arb_pre_rdata;
 logic arb_pre_resp;
 
+// L2_cache
+logic L1_read;
+logic L1_write;
+rv32i_word L1_addr;
+logic L1_resp;
+logic [255:0] L1_rdata;
+logic [255:0] L1_wdata;
+
 // icache
 o_cache icache
 (
@@ -162,7 +170,7 @@ L1_arbiter L1_arbiter
 	.arb_resp_a,
 	
 	// prefetch
-	.pre_read_a,
+	.pre_read_a(1'b0),
 	.pre_addr_a,
 	.arb_pre_rdata,
 	.arb_pre_resp,
@@ -179,47 +187,42 @@ L1_arbiter L1_arbiter
 	.cache_rdata_b,
 	.arb_resp_b,
 
-	// pmem
-	.pmem_read,
-	.pmem_write,
-	.pmem_address,
-	.pmem_resp,
-	.pmem_rdata,
-	.pmem_wdata
+//	.pmem_read,
+//	.pmem_write,
+//	.pmem_address,
+//	.pmem_resp,
+//	.pmem_rdata,
+//	.pmem_wdata
 
-	/* for a future with L2
-	.L1_read,
-	.L1_write,
-	.L1_addr,
-	.L1_resp,
-	.L1_rdata,
-	.L1_wdata
-	*/
+	// pmem
+	.pmem_read(L1_read),
+	.pmem_write(L1_write),
+	.pmem_address(L1_addr),
+	.pmem_resp(L1_resp),
+	.pmem_rdata(L1_rdata),
+	.pmem_wdata(L1_wdata)
 );
 
-/*
-p_cache L2_cache
+L2_cache #(.s_index(4)) L2_cache
 (
 	.clk,
-	
-	.L1_read,
-	.L1_write,
-	.L1_addr,
-	.L1_resp,
-	.L1_rdata,
-	.L1_wdata,
+
+	.mem_read(L1_read),
+	.mem_write(L1_write),
+	.mem_addr(L1_addr),
+	.mem_rdata(L1_rdata),
+	.mem_wdata(L1_wdata),
+	.mem_resp(L1_resp),
 	
 	.pmem_read,
 	.pmem_write,
-	.pmem_address,
+	.pmem_addr(pmem_address),
 	.pmem_resp,
 	.pmem_rdata,
-	.pmem_wdata
+	.pmem_wdata,
+	.pmem_error()
 );
 
 // maybe put registers between L2_cache and pmem here, incur cycle delay, increase fmax
-
-*/
-
 
 endmodule : mem_heirarchy

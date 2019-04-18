@@ -1,5 +1,3 @@
-import rv32i_types::*;
-
 module L2_cache #(
 	parameter s_offset = 5,
    parameter s_index  = 3,
@@ -10,266 +8,263 @@ module L2_cache #(
 )
 (
 	input logic clk,
-	input rv32i_word mem_addr,
+	input [31:0] mem_addr,
+	
 	input logic mem_read,
 	input logic mem_write,
-	input rv32i_word mem_wdata,
-	output rv32i_word mem_rdata,
-	input logic [3:0] mem_byte_enable,
+	input logic [255:0] mem_wdata,
+	output logic [255:0] mem_rdata,
 	output logic mem_resp,
 	
+	input logic pmem_resp,
 	output logic pmem_read,
-	output logic pmem_write,
-	output logic [s_line-1:0] pmem_wdata,
-	output rv32i_word pmem_addr,
-	input logic pmem_error,
 	input logic [s_line-1:0] pmem_rdata,
-	input logic pmem_resp
+	output logic [31:0] pmem_addr,
+	input logic pmem_error,
+	output logic [s_line-1:0] pmem_wdata,
+	output logic pmem_write
 );
 
-logic [s_tag-1:0] mem_tag;
-logic [s_index-1:0] mem_index;
-logic [s_tag-1:0] tag_out [4];
-logic valid_out [4];
-logic dirty_out[4];
-logic load_valid [4];
-logic load_dirty_hit [4];
-logic load_dirty_miss [4];
-logic load_dirty [4];
-logic load_tag [4];
-logic [s_mask-1:0] load_line [4];
-logic dirty_in;
-logic [2:0] lru_in_t, lru_out_t;
-logic [1:0] lru_out,lru_in;
-logic [s_line-1:0] line_out [4];
-logic read_all;
-logic [s_mask-1:0] write_en;
-logic [1:0] line_write_mux_sel;
-logic [s_line-1:0] line_datain;
-logic [1:0] lru_translated;
-logic [1:0] pmem_addr_sel;
-logic lru_load;
-logic hit [4];
-logic update;
-logic [s_mask-1:0] mem_byte_enable256;
-logic [s_line-1:0] mem_rdata256, mem_wdata256;
-logic hit_all;
-logic [1:0] load_hit_sel;
+logic [31:0] mem_byte_enable256, pmem_address;
+logic dirty_load [2];
+logic valid_load [2];
+logic data_read, pmem_load;
+logic dirty_out [2];
+logic [31:0] write_en [2];
+logic [s_line-1:0] data_in [2];
+logic [s_line-1:0] data_out [2];
+logic hit_way [2];
+logic valid_out [2];
+logic [s_tag-1:0] tag_out [2];
+logic [s_tag-1:0] tag;
+logic [s_index-1:0] index;
+logic read, hit, lru_out, datamux_sel, dirty_in, pmem_r, pmem_w;
+logic [1:0] writemux_sel [2];
+logic [s_line-1:0] mem_wdata256, mem_rdata256;
 
-//logic [s_offset-1:0] mem_offset;
+assign tag = mem_addr[31:(s_index + s_offset)];
+assign index = mem_addr[(s_index + s_offset-1):s_offset];
+assign read = mem_read | mem_write;
+assign hit_way[0] = (valid_out[0] && (tag == tag_out[0]));
+assign hit_way[1] = (valid_out[1] && (tag == tag_out[1]));
+assign hit = hit_way[0] | hit_way[1];
 
-assign hit_all = hit[0] || hit[1] || hit[2] || hit[3];
-assign hit[0] = valid_out[0] && (mem_tag == tag_out[0]);
-assign hit[1] = valid_out[1] && (mem_tag == tag_out[1]);
-assign hit[2] = valid_out[2] && (mem_tag == tag_out[2]);
-assign hit[3] = valid_out[3] && (mem_tag == tag_out[3]);
+assign mem_wdata256 = mem_wdata;
+assign mem_rdata = mem_rdata256;
+assign mem_byte_enable256 = {32{1'b1}};
+assign pmem_load = read;
 
-assign mem_tag = mem_addr[31:s_tag];
-assign mem_index = mem_addr[s_offset + s_index - 1:s_offset];
-
-assign read_all = mem_read ^ mem_write;
-
-assign pmem_read = ((hit_all == 0) && mem_read) ||((hit_all == 0) && mem_write && (dirty_out[lru_out] == 0));
-assign pmem_write = ((hit_all == 0) && (mem_read == 1) && (dirty_out[lru_out] == 1));
-assign update = pmem_resp && pmem_read;
-
-assign pmem_wdata = line_out[lru_out];
-assign pmem_addr_sel = (pmem_write << 1) + pmem_read;
-assign mem_resp = (pmem_read == 0) && (pmem_write == 0);
-
-assign line_write_mux_sel = (update << 1) + (hit_all && mem_write);
-assign lru_load = hit_all;
-
-
-//associativity is 4
-
-// probably need to generalize bus adapter if we want to make lines bigger
-bus_adapter adapter
-(
-    .mem_wdata256,
-    .mem_rdata256,
-    .mem_wdata(mem_wdata),
-    .mem_rdata,
-    .mem_byte_enable(mem_byte_enable),
-    .mem_byte_enable256,
-    .address(mem_addr)
-);
-
-array #(.s_index(s_index), .width(1)) valid [4]
+array #(.s_index(s_index), .width(1)) dirty [2] 
 (
 	.clk,
-	.read(read_all),
-	.load(load_valid),
-	.index(mem_index),
-	.datain(1'b1),
-	.dataout(valid_out)
-);
-
-load_array valid_load
-(
-	.sel(lru_out),
-	.load(update),
-	.load_out(load_valid)
-);
-
-array #(.s_index(s_index), .width(1)) dirty [4]
-(
-	.clk,
-	.read(read_all),
-	.load(load_dirty),
-	.index(mem_index),
+	.read,
+	.load(dirty_load),
+	.index,
 	.datain(dirty_in),
 	.dataout(dirty_out)
 );
 
-load_array dirty_load_miss
-(
-	.sel(lru_out),
-	.load(pmem_resp && pmem_write),
-	.load_out(load_dirty_miss)
-);
-
-lru_one_hot_mux #(.width(2)) hit_mux
-(
-	.sel(hit),
-	.a(2'b00),
-	.b(2'b01),
-	.c(2'b10),
-	.d(2'b11),
-	.f(load_hit_sel)
-);
-
-load_array dirty_load_hit
-(
-	.sel(load_hit_sel),
-	.load(mem_write),
-	.load_out(load_dirty_hit)
-);
-
-mux2 #(.width(1)) load_mux [4]
-(
-	.sel(hit_all),
-	.a(load_dirty_miss),
-	.b(load_dirty_hit),
-	.f(load_dirty)
-);
-
-mux2 #(.width(1)) dirty_in_mux 
-(
-	.sel(hit_all),
-	.a(1'b0),
-	.b(mem_write),
-	.f(dirty_in)
-);
-
-
-array #(.s_index(s_index), .width(s_tag)) tag [4]
+array #(.s_index(s_index), .width(1)) valid [2] 
 (
 	.clk,
-	.read(read_all),
-	.load(load_tag),
-	.index(mem_index),
-	.datain(mem_tag),
+	.read,
+	.load(valid_load),
+	.index,
+	.datain(1'b1),
+	.dataout(valid_out)
+);
+
+array #(.s_index(s_index), .width(s_tag)) tag_arr [2] 
+(
+	.clk,
+	.read,
+	.load(valid_load),
+	.index,
+	.datain(tag),
 	.dataout(tag_out)
 );
 
-load_array tag_load
-(
-	.sel(lru_out),
-	.load(1'b1),
-	.load_out(load_tag)
-);
-
-lru_logic lru_logic
-(
-	.hit_all(hit_all),
-	.hit(hit),
-	.lru_in(lru_in_t),
-	.lru_out(lru_out_t)
-);
-
-translate_lru translated_out
-(
-	.lru_in(lru_in_t),
-	.lru_out(lru_out)
-);
-
-translate_lru translated_in
-(
-	.lru_in(lru_out_t),
-	.lru_out(lru_in)
-);
-
-array #(.s_index(s_index), .width(3)) lru
+array #(.s_index(s_index), .width(1)) lru 
 (
 	.clk,
-	.read(read_all),
-	.load(lru_load), // load when hit from stage two regs or  pmem_read gives response
-	.index(mem_index),
-	.datain(lru_out_t),
-	.dataout(lru_in_t)
+	.read,
+	.load(hit),
+	.index,
+	.datain(hit_way[0]),
+	.dataout(lru_out)
 );
 
-
-mux4 #(.width(s_mask)) line_write_mux
+data_array #(.s_offset(s_offset), .s_index(s_index)) line [2] 
 (
-	.sel(line_write_mux_sel),
-	.a({s_mask{1'b0}}),
-	.b(mem_byte_enable256), // comes from byte enable
-	.c({s_mask{1'b1}}),
-	.d({s_mask{1'bz}}),
+	.clk,
+	.read(data_read),
+	.write_en,
+	.index,
+	.datain(data_in),
+	.dataout(data_out)
+);
+
+mux4 line_write_mux [2]
+(
+	.sel(writemux_sel),
+	.a({32{1'b0}}),
+	.b(mem_byte_enable256),
+	.c({32{1'b1}}),
+	.d(),
 	.f(write_en)
 );
 
-mux4 #(.width(s_line)) line_data_in_mux
+mux4 #(.width(s_line)) line_in_mux [2]
 (
-	.sel(line_write_mux_sel),
+	.sel(writemux_sel),
 	.a({s_line{1'bz}}),
-	.b(mem_wdata256), // comes from wdata
+	.b(mem_wdata256),
 	.c(pmem_rdata),
-	.d({s_line{1'bz}}),
-	.f(line_datain)
+	.d(),
+	.f(data_in)
 );
 
-data_array #(.s_offset(s_offset), .s_index(s_index)) line [4]
+mux2 #(.width(s_line)) data_out_mux
+(
+	.sel(datamux_sel),
+	.a(data_out[0]),
+	.b(data_out[1]),
+	.f(mem_rdata256)
+);
+
+register #(.width(s_line)) pmem_wdata_reg
 (
 	.clk,
-	.read(hit), // read at same time hit
-	.write_en(load_line),
-	.index(mem_index),
-	.datain(line_datain),
-	.dataout(line_out)
+	.load(pmem_load),
+	.reset(pmem_resp),
+	.in(mem_rdata256),
+	.out(pmem_wdata)
 );
 
-load_array #(.width(s_mask)) line_load
+register pmem_address_reg
 (
-	.sel(lru_out),
-	.load(write_en),
-	.load_out(load_line)
+	.clk,
+	.load(pmem_load),
+	.reset(pmem_resp),
+	.in(pmem_address),
+	.out(pmem_addr)
 );
 
-
-lru_one_hot_mux #(.width(s_line)) line_data_out_mux
+register #(.width(1)) pmem_read_reg
 (
-	.sel(hit),
-	.a(line_out[0]),
-	.b(line_out[1]),
-	.c(line_out[2]),
-	.d(line_out[3]),
-	.f(mem_rdata256) // not connected to anything should go out to cpu
+	.clk,
+	.load(pmem_load),
+	.reset(pmem_resp),
+	.in(pmem_r),
+	.out(pmem_read)
 );
 
-mux4 pmem_address_mux
+register #(.width(1)) pmem_write_reg
 (
-	.sel(pmem_addr_sel),
-	.a({32{1'bz}}),
-	.b({{mem_addr[31:s_offset]},{s_offset{1'b0}}}),
-	.c({{tag_out[lru_out]},{mem_index},{s_offset{1'b0}}}),
-	.d({32{1'bz}}),
-	.f(pmem_addr)
+	.clk,
+	.load(pmem_load),
+	.reset(pmem_resp),
+	.in(pmem_w),
+	.out(pmem_write)
 );
 
+enum int unsigned {
+	check_tag,
+	allocate,
+	write_back
+} state, next_state;
 
+always_comb
+begin : next_state_logic
+	next_state = state;
+	case(state)
+		check_tag:
+		begin
+			next_state = check_tag;
+			if((hit == 0) && (mem_write | mem_read))
+			begin
+				// if dirty, then write_back, if  clean, then write_back
+				if(dirty_out[lru_out])
+					next_state = write_back;
+				else
+					next_state = allocate;
+			end
+		end
+		allocate:
+		begin
+			if(pmem_resp)
+				next_state = check_tag;
+		end
+		write_back:
+		begin
+			if(pmem_resp)
+				next_state = allocate;
+		end
+	endcase
+end
 
+always_comb
+begin : state_actions
+	mem_resp = 0;
+	data_read = 0;
+	pmem_address = {32{1'bz}};
+	pmem_r = 0;
+	pmem_w = 0;
+	writemux_sel[0] = 0;
+	writemux_sel[1] = 0;
+	datamux_sel = 1'bx;
+	dirty_in = 0;
+	dirty_load[0] = 0;
+	dirty_load[1] = 0;
+	valid_load[0] = 0;
+	valid_load[1] = 0;
+	case(state)
+		check_tag:
+		begin
+			mem_resp = hit && read;
+			if(read)
+			begin
+				data_read = 1;
+			end
+			if(hit)
+			begin
+				datamux_sel = hit_way[1];
+				if(mem_write)
+				begin
+					writemux_sel[hit_way[1]] = 1;
+					dirty_in = 1;
+					dirty_load[hit_way[1]] = 1;
+				end
+			end
+		end
+		allocate:
+		begin
+			pmem_r = 1;
+			pmem_address = {{mem_addr[31:5]},{5'b0}};
+			if(pmem_resp)
+			begin
+				writemux_sel[lru_out] = 2;
+				dirty_load[lru_out] = 1;
+				valid_load[lru_out] = 1;
+			end
+		end
+		write_back:
+		begin
+			pmem_w = 1;
+			datamux_sel = lru_out;
+			pmem_address = {{tag_out[lru_out]},{mem_addr[s_index + 4:5]},{5'b0}};
+		end
+	endcase
+end
+
+initial begin
+	state = check_tag;
+end
+
+always_ff @(posedge clk)
+begin: next_state_assignment
+    /* Assignment of next state on clock edge */
+	 state <= next_state;
+end
 
 endmodule : L2_cache

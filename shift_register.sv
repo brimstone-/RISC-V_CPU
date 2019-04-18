@@ -8,7 +8,6 @@ module shift_register #(
 	input logic [width-1:0] in,
 	input logic shift,
 	input logic load,
-	output logic error,
 	output logic [width-1:0] out
 );
 
@@ -22,8 +21,6 @@ initial begin
 		data[i] = 0;
 	end
 end
-
-assign error = valid[size-1];
 
 always_ff @(posedge clk)
 begin

@@ -34,8 +34,8 @@ cpu cpu
 	.*
 );
 
-cache_heirarchy cache_datapath
-//mem_heirarchy mem_heirarchy
+//cache_heirarchy cache_datapath
+mem_heirarchy mem_heirarchy
 (
 	.clk,
 
