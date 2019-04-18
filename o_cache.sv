@@ -26,7 +26,7 @@ module o_cache #(
 	output logic pmem_write
 );
 
-logic [31:0] mem_address, mem_byte_enable256, pmem_address;
+logic [31:0] mem_byte_enable256, pmem_address;
 logic dirty_load [2];
 logic valid_load [2];
 logic data_read, pmem_load;
@@ -88,15 +88,6 @@ array #(.s_index(s_index), .width(1)) lru
 	.index,
 	.datain(hit_way[0]),
 	.dataout(lru_out)
-);
-
-register mem_reg
-(
-	.clk,
-	.load(1'b1),
-	.reset(1'b0),
-	.in(mem_addr),
-	.out(mem_address)
 );
 
 data_array #(.s_offset(s_offset), .s_index(s_index)) line [2] 
@@ -174,8 +165,6 @@ register #(.width(1)) pmem_write_reg
 	.in(pmem_w),
 	.out(pmem_write)
 );
-
-//assign pmem_wdata = mem_rdata256;
 
 bus_adapter adapter 
 (
@@ -286,6 +275,5 @@ begin: next_state_assignment
     /* Assignment of next state on clock edge */
 	 state <= next_state;
 end
-
 
 endmodule : o_cache
