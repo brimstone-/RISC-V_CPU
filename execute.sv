@@ -14,7 +14,9 @@ module execute #(parameter width = 32)
 	input logic hazard_mem_exec [2],
 	input logic hazard_wb_exec [2],
 	input logic [31:0] wb_exec,
-	input logic [31:0] mem_exec
+	input logic [31:0] mem_exec,
+	input predict_regs predict_regs_in,
+	output predict_regs predict_regs_out
 );
 
 rv32i_word alumux1_out, alumux2_out, alu2_val;
@@ -179,6 +181,15 @@ register #($bits(regs)) stage_reg
 	 .reset(reset && resp_a && resp_b),
     .in(regs),						// struct of things to pass to stage 4
     .out(regs_out)						// values stage 3 holds
+);
+
+register #($bits(predict_regs_in)) bhr_reg
+(
+	.clk,
+	.load(resp_a && resp_b),
+	.reset(reset && resp_a && resp_b),
+	.in(predict_regs_in),
+	.out(predict_regs_out)
 );
 
 endmodule : execute

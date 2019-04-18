@@ -32,6 +32,7 @@ rv32i_word pc;
 rv32i_word instruction;
 rv32i_word dcache_out;
 logic stall_out;
+logic reset;
 
 rv32i_word alu_out;
 
@@ -42,21 +43,12 @@ logic hazard_mem_exec [2];
 logic hazard_exe_dec [2];
 logic [31:0] wb_mem, wb_dec, wb_exec, mem_exec;
 
+predict_regs predict_fetch, predict_dec, predict_exec;
+
 rv32i_word exec_forward;
 rv32i_word mem_forward;
 
 assign stallreg_in = (hazard_exe_dec [0] || hazard_exe_dec[1]) && ((stage_two_regs.ctrl.opcode == op_load) || (stage_two_regs.ctrl.opcode == op_lui)) && stage_two_regs.valid;
-
-
-// apparently this is not necessary??
-//register #(.width(1)) stall_reg
-//(
-//	.clk,
-//	.load(1'b1),
-//	.reset(1'b0),
-//	.in(stallreg_in),
-//	.out(stall_in)
-//);
 
 fetch stage_one
 (
@@ -68,16 +60,16 @@ fetch stage_one
 	 .resp_a,
 	 .resp_b(~stall_out),
 	 .regs_in(stage_three_regs),
-    .pc,
-	 //.instruction,
+	 .predict_regs_in(predict_exec),
+    .predict_regs_out(predict_fetch),
+	 .pc,
 	 .stall_in(stallreg_in)
 );
 
 decode stage_two
 (
 	.clk,
-	.reset(stage_three_regs.ctrl.pcmux_sel),
-//	.reset(1'b0),
+	.reset,
 	.instruction(rdata_a), // from instruction cache
 	.resp_a,
 	.resp_b(~stall_out),
@@ -85,6 +77,8 @@ decode stage_two
 	.cache_out(rd_data), // from wb
 	.ld_regfile(ld_regfile), // from wb
 	.rd(rd), // from wb
+	.predict_regs_in(predict_fetch),
+   .predict_regs_out(predict_dec),
 	.regs_out(stage_two_regs),
 	.regs_out_comb(stage_one_regs),
 	.stall_in(stallreg_in),
@@ -95,7 +89,7 @@ decode stage_two
 execute stage_three
 (
 	.clk,
-	.reset(stage_three_regs.ctrl.pcmux_sel),
+	.reset,
 	.resp_a,
 	.resp_b(~stall_out),
 	.regs_in(stage_two_regs),
@@ -103,6 +97,8 @@ execute stage_three
 	.stall_in(),
 	.stall_out(),
 	.alu_out,
+	.predict_regs_in(predict_dec),
+	.predict_regs_out(predict_exec),
 	.hazard_mem_exec,
 	.hazard_wb_exec,
 	.wb_exec,
@@ -112,7 +108,7 @@ execute stage_three
 mem stage_four
 (
 	.clk,
-	.reset(1'b0),
+	.reset,
 	.regs_in(stage_three_regs),
 	.resp_a,
 	.resp_b,
@@ -127,7 +123,8 @@ mem stage_four
 	.stall_in(),
 	.stall_out,
 	.hazard_wb_mem,
-	.wb_mem
+	.wb_mem,
+	.predict_regs_in(predict_exec)
 );
 
 writeback stage_five

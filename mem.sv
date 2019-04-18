@@ -3,7 +3,7 @@ import rv32i_types::*;
 module mem (
 	input logic clk,
 
-	input reset,
+	output logic reset,
 	input stage_regs regs_in, 
 	
 	input resp_a,
@@ -22,21 +22,12 @@ module mem (
 	input logic hazard_wb_mem[2],
 	input logic [31:0] wb_mem,
 	input stall_in,
-	output logic stall_out
+	output logic stall_out,
+	input predict_regs predict_regs_in
 ); 
 
-// without cache, we don't do much in this stage right? 
-//assign out.pc = in.pc;
-//assign out.ctrl = in.ctrl;
-//assign out.alu = in.alu;
-//assign out.rd = in.rd;
-//assign out.br = in.br;              // aready zext in EX stage 
-//assign out.valid = in.valid;
-
-// TODO: pass PC to dCache for WB stage
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
-//assign wdata = regs_in.rs2;
 assign address_b = regs_in.alu;
 mux2 wdata_mux
 (
@@ -46,16 +37,7 @@ mux2 wdata_mux
 	.f(wdata)
 );
 
-//mux2 addr_mux
-//(
-//	.sel(hazard_wb_mem[0]),
-//	.a(regs_in.alu),
-//	.b(wb_mem),
-//	.f(address_b)
-//);
-
-// low most of the tim, so we ~ it, so that everything loads.
-//assign stall_out = ~((read_b | write) & ~resp_b);
+assign reset = predict_regs_in.taken ^ regs_in.ctrl.pcmux_sel;
 assign stall_out = (read_b | write) && (resp_b == 0);
 
 register #($bits(regs_in)) stage_reg (
@@ -72,7 +54,7 @@ store_mask store_mask
 	.alu_out(regs_in.alu[1:0]),
 	.out(wmask)
 );
-//assign dcache_out = rdata_b;
+
 register rdata
 (
 	.clk,

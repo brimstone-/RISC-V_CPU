@@ -67,6 +67,7 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE array.sv
+set_global_assignment -name SYSTEMVERILOG_FILE btb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE bus_adapter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cache_heirarchy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
@@ -79,6 +80,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE execute.sv
 set_global_assignment -name SYSTEMVERILOG_FILE fetch.sv
 set_global_assignment -name SYSTEMVERILOG_FILE forward.sv
 set_global_assignment -name SYSTEMVERILOG_FILE forward_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE gshare.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ir.sv
 set_global_assignment -name SYSTEMVERILOG_FILE L1_arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE L2_cache.sv
@@ -88,7 +90,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE lru_one_hot_mux.sv
 set_global_assignment -name SYSTEMVERILOG_FILE load_array.sv
 set_global_assignment -name SYSTEMVERILOG_FILE load_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE prefetch.sv
-set_global_assignment -name SYSTEMVERILOG_FILE magic_dual_port.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem_heirarchy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3_tb.sv
@@ -104,6 +105,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
 set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rv32i_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE sat_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE shift_register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE store_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE translate_lru.sv

@@ -94,7 +94,6 @@ typedef struct packed {
 	logic [31:0] br;
 	logic valid;
 	logic [2:0] funct3;
-	logic [2:0] bhr;
 } stage_regs;
 
 typedef struct packed {

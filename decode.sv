@@ -11,6 +11,8 @@ module decode
 	input logic ld_regfile,
 	input [4:0] rd,
 	input rv32i_word instruction,
+	input predict_regs predict_regs_in,
+	output predict_regs predict_regs_out,
 	output stage_regs regs_out,
 	output stage_regs regs_out_comb,
 	
@@ -36,9 +38,7 @@ assign stage.b_imm 	= b;
 assign stage.u_imm 	= u;
 assign stage.j_imm 	= j;
 assign stage.rd 		= reg_rd;
-//assign stage.rs1 		= reg_a;
 assign stage.rs1_num = src_a;
-//assign stage.rs2 		= reg_b;
 assign stage.rs2_num = src_b;
 assign stage.pc		= pc;
 assign stage.ctrl 	= ctrl;
@@ -105,10 +105,19 @@ regfile regfile
 register #($bits(stage)) stage_reg
 (
 	 .clk(clk),
-    .load(resp_a && resp_b), 					// always high for now. will be dependedent on mem_resp later
+    .load(resp_a && resp_b),
 	 .reset(reset || (stall_in && (resp_b) &&(resp_a))),
     .in(stage),							// struct of things to pass to stage 3
     .out(regs_out)						// values stage 3 holds
+);
+
+register #($bits(predict_regs_in)) bhr_reg
+(
+	.clk,
+	.load(resp_a && resp_b),
+	.reset(reset && resp_a && resp_b),
+	.in(predict_regs_in),
+	.out(predict_regs_out)
 );
 
 endmodule : decode
