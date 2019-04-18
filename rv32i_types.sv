@@ -94,6 +94,7 @@ typedef struct packed {
 	logic [31:0] br;
 	logic valid;
 	logic [2:0] funct3;
+	logic [2:0] bhr;
 } stage_regs;
 
 typedef struct packed {
@@ -104,6 +105,11 @@ typedef struct packed {
 	logic mem_write;
 	logic mem_read;
 } cache_regs;
+
+typedef struct packed {
+	logic [2:0] bhr;
+	logic taken;
+} predict_regs;
 
 typedef logic [31:0] rv32i_word;
 typedef logic [4:0] rv32i_reg;
