@@ -264,7 +264,7 @@ begin : state_actions
 			if(pmem_resp)
 			begin
 				writemux_sel[lru_out] = 2;
-				dirty_load[lru_out] = 0;
+				dirty_load[lru_out] = 1;
 				valid_load[lru_out] = 1;
 			end
 		end

@@ -176,7 +176,7 @@ register #($bits(regs)) stage_reg
 (
 	 .clk(clk),
     .load(resp_a && resp_b), 					// always high for now. will be dependedent on mem_resp later
-	 .reset(reset),
+	 .reset(reset && resp_a && resp_b),
     .in(regs),						// struct of things to pass to stage 4
     .out(regs_out)						// values stage 3 holds
 );
