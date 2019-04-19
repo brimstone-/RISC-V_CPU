@@ -105,7 +105,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
 set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rv32i_types.sv
-set_global_assignment -name SYSTEMVERILOG_FILE sat_counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE shift_register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE store_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE translate_lru.sv

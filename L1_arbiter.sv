@@ -10,12 +10,6 @@ module L1_arbiter
 	output logic [255:0] arb_rdata_a,
 	output logic arb_resp_a,
 	
-	// prefetch (predict read a)
-	input pre_read_a,
-	input rv32i_word pre_addr_a,
-	output logic [255:0] arb_pre_rdata,
-	output logic arb_pre_resp,
-	
 	// ewb (demand write b)
 	output logic arb_ewb_resp,
 	input ewb_write,
@@ -42,10 +36,7 @@ logic [1:0] addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
 logic load_type;
-logic addr_hit;
 logic [1:0] transaction_type_in, transaction_type_out;
-
-assign addr_hit = pre_addr_a == cache_addr_a;
 
 mux4 addr_mux
 (
@@ -53,7 +44,7 @@ mux4 addr_mux
 	.a(cache_addr_a), // demand read a
 	.b(cache_addr_b), // demand read b
 	.c(ewb_addr),     // demand write b
-	.d(pre_addr_a),   // predict read a
+	.d(),
 	.f(addr_mux_out)
 );
 
@@ -68,7 +59,6 @@ register addr_reg
 
 assign arb_rdata_a = rdata_out;
 assign cache_rdata_b = rdata_out;
-assign arb_pre_rdata = rdata_out;
 
 register #(.width(256)) rdata_reg
 (
@@ -92,7 +82,6 @@ register #(.width(256)) wdata_reg
 	0 = read a
 	1 = read b
 	2 = write b
-	3 = prefetch a
 */
 register #(.width(2)) transaction_type_reg
 (
@@ -108,7 +97,6 @@ enum int unsigned {
 	read_a,
 	read_b,
 	write_b,
-	pre_read,
 	reading,
 	writing,
 	finish
@@ -132,8 +120,6 @@ begin : state_actions
 	arb_resp_a = 0;
 	arb_resp_b = 0;
 	arb_ewb_resp = 0;
-	arb_pre_resp = 0;
-
 
 	case(state)
 		idle: ;
@@ -156,12 +142,6 @@ begin : state_actions
 			load_type = 1;
 			transaction_type_in = 2;
 		end
-		pre_read: begin
-			addr_mux_sel = 3;
-			load_addr = 1;
-			load_type = 1;
-			transaction_type_in = 3;
-		end
 		reading: begin
 			pmem_read = 1;
 			load_rdata = 1;
@@ -174,10 +154,6 @@ begin : state_actions
 				0: arb_resp_a = 1;
 				1: arb_resp_b = 1;
 				2: arb_ewb_resp = 1;
-				3: begin
-					arb_pre_resp = 1;
-					if (cache_read_a & addr_hit) arb_resp_a = 1;
-				end
 				default: ;
 			endcase // transaction_type_out
 		end
@@ -193,14 +169,12 @@ begin : next_state_logic
 			if (cache_read_a) next_state = read_a;
 			else if (ewb_write) next_state = write_b;
 			else if (cache_read_b) next_state = read_b;
-			else if (pre_read_a) next_state = pre_read;
 			else next_state = idle;
 		end
 
 		read_a: next_state = reading;
 		read_b: next_state = reading;
 		write_b: next_state = writing;
-		pre_read: next_state = reading;
 
 		reading: begin
 			if (pmem_resp) next_state = finish;

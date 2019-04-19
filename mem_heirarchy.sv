@@ -45,11 +45,6 @@ logic [255:0] arb_rdata_b;
 logic [255:0] cache_rdata_b;
 logic [255:0] cache_wdata_b;
 
-// prefetch
-logic pre_resp_a;
-logic [255:0] pre_rdata_a;
-logic pre_read_a;
-
 // ewb
 logic ewb_resp_b;
 logic ewb_write;
@@ -60,9 +55,6 @@ rv32i_word ewb_addr;
 // arbiter
 logic arb_resp_a;
 logic arb_resp_b;
-rv32i_word pre_addr_a;
-logic [255:0] arb_pre_rdata;
-logic arb_pre_resp;
 
 // L2_cache
 logic L1_read;
@@ -94,15 +86,8 @@ o_cache icache
 	.pmem_error()
 );
 
-mux2 #(.width(256)) rdata_a_mux
-(
-	.sel(pre_resp_a),
-	.a(arb_rdata_a),
-	.b(pre_rdata_a),
-	.f(cache_rdata_a)
-);
-
-assign cache_resp_a = arb_resp_a | pre_resp_a;
+assign cache_rdata_a = arb_rdata_a;
+assign cache_resp_a = arb_resp_a;
 assign cache_resp_b = arb_resp_b | ewb_resp_b;
 
 // d cache
@@ -127,7 +112,7 @@ o_cache dcache
 	.pmem_error()
 );
 
-
+/*
 prefetch prefetch
 (
 	.clk,
@@ -142,6 +127,7 @@ prefetch prefetch
 	.arb_pre_rdata,
 	.arb_pre_resp
 );
+*/
 
 external_write_buffer ewb
 (
@@ -168,13 +154,7 @@ L1_arbiter L1_arbiter
 	.cache_addr_a,
 	.arb_rdata_a,
 	.arb_resp_a,
-	
-	// prefetch
-	.pre_read_a(1'b0),
-	.pre_addr_a,
-	.arb_pre_rdata,
-	.arb_pre_resp,
-	
+
 	// ewb
 	.arb_ewb_resp,
 	.ewb_write,
@@ -186,13 +166,6 @@ L1_arbiter L1_arbiter
 	.cache_addr_b,
 	.cache_rdata_b,
 	.arb_resp_b,
-
-//	.pmem_read,
-//	.pmem_write,
-//	.pmem_address,
-//	.pmem_resp,
-//	.pmem_rdata,
-//	.pmem_wdata
 
 	// pmem
 	.pmem_read(L1_read),
