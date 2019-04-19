@@ -74,7 +74,7 @@ end
 
 always_ff @(posedge clk)
 begin
-	read_a = resp_b && (stall_in == 0);
+	read_a = resp_b;
 end
 
 gshare branch_predictor
