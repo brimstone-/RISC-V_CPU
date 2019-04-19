@@ -83,13 +83,13 @@ set_global_assignment -name SYSTEMVERILOG_FILE forward_unit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE gshare.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ir.sv
 set_global_assignment -name SYSTEMVERILOG_FILE L1_arbiter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE L2_arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE L2_cache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE line_adapter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE lru_logic.sv
 set_global_assignment -name SYSTEMVERILOG_FILE lru_one_hot_mux.sv
 set_global_assignment -name SYSTEMVERILOG_FILE load_array.sv
 set_global_assignment -name SYSTEMVERILOG_FILE load_mask.sv
-set_global_assignment -name SYSTEMVERILOG_FILE prefetch.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mem_heirarchy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE mp3_tb.sv
@@ -102,6 +102,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE o_cache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE p_cache.sv
 set_global_assignment -name SYSTEMVERILOG_FILE pc_reg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE physical_memory.sv
+set_global_assignment -name SYSTEMVERILOG_FILE prefetch.sv
 set_global_assignment -name SYSTEMVERILOG_FILE regfile.sv
 set_global_assignment -name SYSTEMVERILOG_FILE register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rv32i_types.sv

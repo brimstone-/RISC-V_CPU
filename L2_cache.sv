@@ -20,7 +20,6 @@ module L2_cache #(
 	output logic pmem_read,
 	input logic [s_line-1:0] pmem_rdata,
 	output logic [31:0] pmem_addr,
-	input logic pmem_error,
 	output logic [s_line-1:0] pmem_wdata,
 	output logic pmem_write
 );

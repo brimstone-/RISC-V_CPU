@@ -4,19 +4,19 @@ module prefetch
 (
 	input clk,
 
-	input cache_read_a,
-	input rv32i_word cache_addr_a,
-	output logic pre_resp_a,
-	output logic [255:0] pre_rdata_a,
+	input cache_read,
+	input rv32i_word cache_addr,
+	output logic pre_resp,
+	output logic [255:0] pre_rdata,
 	
-	output logic pre_read_a,
-	output rv32i_word pre_addr_a,
+	output logic pre_read,
+	output rv32i_word pre_addr,
 	input [255:0] arb_pre_rdata,
 	input arb_pre_resp
 );
 
 logic addr_hit;
-assign addr_hit = cache_addr_a == pre_addr_a;
+assign addr_hit = cache_addr == pre_addr;
 
 logic load_addr;
 
@@ -30,7 +30,7 @@ register #(.width(256)) rdata_reg
 	.load(arb_pre_resp),
 	.reset(1'b0),
 	.in(arb_pre_rdata),
-	.out(pre_rdata_a)
+	.out(pre_rdata)
 );
 
 register #(.width(32)) addr_reg
@@ -38,8 +38,8 @@ register #(.width(32)) addr_reg
 	.clk,
 	.load(load_addr),
 	.reset(1'b0),
-	.in(cache_addr_a + 32'h00000020),
-	.out(pre_addr_a)
+	.in(cache_addr + 32'h00000020),
+	.out(pre_addr)
 );
 
 register #(.width(1)) past_read_reg
@@ -67,13 +67,13 @@ begin : state_actions
 	load_past_read = 0;
 	past_read_in = 0;
 	
-	pre_read_a = 0;
-	pre_resp_a = 0;
+	pre_read = 0;
+	pre_resp = 0;
 	
 	case(state)
 		idle: ;
 		hit: begin
-			pre_resp_a = 1;
+			pre_resp = 1;
 			load_addr = 1;
 			load_past_read = 1;
 			past_read_in = 1;
@@ -85,15 +85,13 @@ begin : state_actions
 		end
 		waiting: ;
 		reading: begin
-			pre_read_a = 1;
+			pre_read = 1;
 			// rdata reg loaded by mem resp
 		end
 		finish: begin
-			pre_resp_a = 1;
 			load_past_read = 1;
 			past_read_in = 0;
 		end
-
 		default: ;
 	endcase
 end
@@ -103,8 +101,8 @@ begin : next_state_logic
 	next_state = state;
 	case(state)
 		idle: begin
-			if (cache_read_a & addr_hit) next_state = hit;
-			else if (cache_read_a & ~addr_hit) next_state = load_regs;
+			if (cache_read & addr_hit) next_state = hit;
+			else if (cache_read & ~addr_hit) next_state = load_regs;
 			else if (past_read_out) next_state = reading;
 			else next_state = idle;
 		end
@@ -113,7 +111,7 @@ begin : next_state_logic
 		end
 		load_regs: next_state = waiting;
 		waiting: begin
-			if (cache_read_a) next_state = waiting;
+			if (cache_read) next_state = waiting;
 			else next_state = reading;
 		end
 		reading: begin

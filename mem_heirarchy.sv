@@ -64,6 +64,22 @@ logic L1_resp;
 logic [255:0] L1_rdata;
 logic [255:0] L1_wdata;
 
+logic L2_read;
+logic L2_write;
+logic L2_resp;
+logic L2_arb_resp;
+rv32i_word L2_addr;
+logic [255:0] L2_rdata;
+logic [255:0] L2_arb_rdata;
+logic [255:0] L2_wdata;
+
+logic pre_resp;
+logic [255:0] pre_rdata;
+logic pre_read;
+rv32i_word pre_addr;
+logic [255:0] arb_pre_rdata;
+logic arb_pre_resp;
+
 // icache
 o_cache icache
 (
@@ -82,8 +98,7 @@ o_cache icache
 	.pmem_addr(cache_addr_a),
 	.pmem_resp(cache_resp_a),
 	.pmem_rdata(cache_rdata_a),
-	.pmem_wdata(),
-	.pmem_error()
+	.pmem_wdata()
 );
 
 assign cache_rdata_a = arb_rdata_a;
@@ -108,26 +123,8 @@ o_cache dcache
 	.pmem_addr(cache_addr_b),
 	.pmem_resp(cache_resp_b),
 	.pmem_rdata(cache_rdata_b),
-	.pmem_wdata(cache_wdata_b),
-	.pmem_error()
+	.pmem_wdata(cache_wdata_b)
 );
-
-/*
-prefetch prefetch
-(
-	.clk,
-	
-	.cache_read_a,
-	.cache_addr_a,
-	
-	.pre_resp_a,
-	.pre_rdata_a,
-	.pre_read_a,
-	.pre_addr_a,
-	.arb_pre_rdata,
-	.arb_pre_resp
-);
-*/
 
 external_write_buffer ewb
 (
@@ -187,13 +184,64 @@ L2_cache #(.s_index(4)) L2_cache
 	.mem_wdata(L1_wdata),
 	.mem_resp(L1_resp),
 	
+	.pmem_read(L2_read),
+	.pmem_write(L2_write),
+	.pmem_addr(L2_addr),
+	.pmem_resp(L2_resp),
+	.pmem_rdata(L2_rdata),
+	.pmem_wdata(L2_wdata)
+);
+
+assign L2_resp = pre_resp | L2_arb_resp;
+
+mux2 #(.width(256)) L2_rdata_mux
+(
+	.sel(pre_resp),
+	.a(L2_arb_rdata),
+	.b(pre_rdata),
+	.f(L2_rdata)
+);
+
+prefetch prefetch
+(
+	.clk,
+
+	.cache_read(L2_read),
+	.cache_addr(L2_addr),
+
+	.pre_resp,
+	.pre_rdata,
+	.pre_read,
+	.pre_addr,
+	.arb_pre_rdata,
+	.arb_pre_resp
+);
+
+L2_arbiter L2_arbiter
+(
+	.clk,
+
+	// from/to L2
+	.L2_read,
+	.L2_write,
+	.L2_addr,
+	.L2_rdata(L2_arb_rdata),
+	.L2_wdata,
+	.L2_arb_resp,
+	
+	// from/to prefetcher
+	.pre_read,
+	.pre_addr,
+	.arb_pre_rdata,
+	.arb_pre_resp,
+	
+	// pmem
 	.pmem_read,
 	.pmem_write,
-	.pmem_addr(pmem_address),
+	.pmem_address,
 	.pmem_resp,
 	.pmem_rdata,
-	.pmem_wdata,
-	.pmem_error()
+	.pmem_wdata
 );
 
 // maybe put registers between L2_cache and pmem here, incur cycle delay, increase fmax
