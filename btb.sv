@@ -30,21 +30,29 @@ assign load = pcmux_sel;
 assign fetch_index = fetch_pc[s_index+1:2];
 assign exec_index = exec_pc[s_index+1:2];
 
-assign hit_internal = tag[fetch_index] == fetch_pc;
+assign hit = tag[fetch_index] == fetch_pc;
+
+mux2 target_mux
+(
+	.sel(hit),
+	.a({32{1'bx}}),
+	.b(data[fetch_index]),
+	.f(target)
+);
 
 always_ff @(posedge clk) begin
-	hit = 0;
+//	hit = 0;
 	if (load) begin
 		tag[exec_index] <= exec_pc;
 		data[exec_index] <= alu_out;
 	end
 
-	if (hit_internal) begin
-		hit = 1;
-		target <= data[fetch_index];
-	end else begin
-		target <= {32{1'bx}};
-	end
+//	if (hit_internal) begin
+//		hit = 1;
+//		target <= data[fetch_index];
+//	end else begin
+//		target <= {32{1'bx}};
+//	end
 end
 
 endmodule : branch_target_buffer

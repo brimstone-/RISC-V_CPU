@@ -33,6 +33,7 @@ rv32i_word instruction;
 rv32i_word dcache_out;
 logic stall_out;
 logic reset;
+logic predict_addr;
 
 rv32i_word alu_out;
 
@@ -63,7 +64,8 @@ fetch stage_one
 	 .predict_regs_in(predict_exec),
     .predict_regs_out(predict_fetch),
 	 .pc,
-	 .stall_in(stallreg_in)
+	 .stall_in(stallreg_in),
+	 .predict_addr
 );
 
 decode stage_two
@@ -124,7 +126,8 @@ mem stage_four
 	.stall_out,
 	.hazard_wb_mem,
 	.wb_mem,
-	.predict_regs_in(predict_exec)
+	.predict_regs_in(predict_exec),
+	.predict_addr
 );
 
 writeback stage_five

@@ -23,6 +23,7 @@ module mem (
 	input logic [31:0] wb_mem,
 	input stall_in,
 	output logic stall_out,
+	output logic predict_addr,
 	input predict_regs predict_regs_in
 ); 
 
@@ -37,12 +38,13 @@ mux2 wdata_mux
 	.f(wdata)
 );
 
-assign reset = predict_regs_in.taken ^ regs_in.ctrl.pcmux_sel;
+assign reset = (predict_regs_in.taken ^ regs_in.ctrl.pcmux_sel) || ((predict_addr == 0) && (predict_regs_in.taken && regs_in.ctrl.pcmux_sel));
+assign predict_addr = predict_regs_in.btb_address == regs_in.alu;
 assign stall_out = (read_b | write) && (resp_b == 0);
 
 register #($bits(regs_in)) stage_reg (
 	.clk(clk),
-	.reset(reset),
+	.reset(1'b0),
 	.load(resp_a && (~stall_out)),
 	.in(regs_in),
 	.out(regs_out)

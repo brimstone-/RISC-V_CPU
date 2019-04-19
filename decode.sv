@@ -106,7 +106,7 @@ register #($bits(stage)) stage_reg
 (
 	 .clk(clk),
     .load(resp_a && resp_b),
-	 .reset(reset || (stall_in && (resp_b) &&(resp_a))),
+	 .reset((reset || stall_in) && resp_b && resp_a),
     .in(stage),							// struct of things to pass to stage 3
     .out(regs_out)						// values stage 3 holds
 );
@@ -115,7 +115,7 @@ register #($bits(predict_regs_in)) bhr_reg
 (
 	.clk,
 	.load(resp_a && resp_b),
-	.reset(reset && resp_a && resp_b),
+	.reset((reset || stall_in) && resp_a && resp_b),
 	.in(predict_regs_in),
 	.out(predict_regs_out)
 );

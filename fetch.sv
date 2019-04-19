@@ -12,7 +12,8 @@ module fetch (
     input stage_regs regs_in,
     output rv32i_word pc,
 	 input logic reset_mux,
-	 input stall_in
+	 input stall_in,
+	 input predict_addr
 );
 
 predict_regs predict_regs_internal;
@@ -25,24 +26,40 @@ rv32i_word taken_mux_out, not_taken_mux_out;
 
 logic [2:0] bhr;
 logic taken, taken_hit, btb_hit;
+logic [1:0] mux_sel;
+logic [3:0] select;
 
-mux8 pc_mux
+assign select = {{predict_addr},{regs_in.ctrl.pcmux_sel},{predict_regs_in.taken},{taken_hit}};
+
+always_comb
+begin
+	casex(select)
+		4'b0110: mux_sel = 3;       // we predicted branch, we branched, we got the wrong address
+		4'b0111: mux_sel = 3;		 // we predicted branch, we branched, we got the wrong address
+		4'b1110: mux_sel = 0;		 // we predicted branch, we did branch, addresses were correct, do not predict branch
+		4'b1111:	mux_sel = 1;		 // we predicted branch, we did branch, addresses were correct, predict branch
+		4'b?000: mux_sel = 0;       // we did not predict branch, we did not branch, do no predict branch
+		4'b?001: mux_sel = 1;		 // we did not predict branch, we did not branch, predict branch
+		4'b?010: mux_sel = 2;		 // we predicted branch, we did not branch
+		4'b?011: mux_sel = 2;		 // we predicted branch, we did not branch
+		4'b?100: mux_sel = 3;		 // we did not predict branch, we did branch
+		4'b?101: mux_sel = 3;	 	 // we did not predict branch, we did branch
+	endcase
+end
+
+mux4 pc_mux
 (
-	.sel({regs_in.ctrl.pcmux_sel, predict_regs_in.taken, taken_hit}),
+	.sel(mux_sel),
 	.a(pc_out + 4),
 	.b(target),
 	.c(regs_in.pc + 4),
-	.d(regs_in.pc + 4),
-	.e(regs_in.alu),
-	.f(regs_in.alu),
-	.g(pc_out + 4),
-	.h(target),
-	.out(pcmux_out)
+	.d(regs_in.alu),
+	.f(pcmux_out)
 );
 
 pc_register pc_reg (
 	.clk(clk),
-	.load(resp_a && resp_b && (stall_in == 0) || regs_in.ctrl.pcmux_sel || taken_hit),
+	.load(resp_a && resp_b && ((stall_in == 0) || ((mux_sel != 0) && (mux_sel != 1)))),
 	.in(pcmux_out),
 	.out(pc_out)
 );
@@ -54,11 +71,10 @@ initial begin
 	read_a = 1;
 end
 
+
 always_ff @(posedge clk)
 begin
-	read_a = 1'b0;
-	if(resp_b)
-		read_a = 1'b1;
+	read_a = resp_b && (stall_in == 0);
 end
 
 gshare branch_predictor
@@ -79,6 +95,7 @@ gshare branch_predictor
 
 assign taken_hit = predict_regs_internal.taken;
 assign predict_regs_internal.taken = taken & btb_hit;
+assign predict_regs_internal.btb_address = target;
 
 branch_target_buffer btb
 (
@@ -93,13 +110,15 @@ branch_target_buffer btb
     .exec_pc(regs_in.pc) // from execute, to fill tag
 );
 
-register #($bits(predict_regs_internal)) bhr_reg
-(
-	 .clk,
-    .load(resp_a && resp_b && (stall_in == 0) || regs_in.ctrl.pcmux_sel),
-	 .reset(1'b0),
-    .in(predict_regs_internal),
-    .out(predict_regs_out)
-);
+assign predict_regs_out = predict_regs_internal;
+
+//register #($bits(predict_regs_internal)) bhr_reg
+//(
+//	 .clk,
+//    .load(resp_a && resp_b && (stall_in == 0) || regs_in.ctrl.pcmux_sel),
+//	 .reset(1'b0),
+//    .in(predict_regs_internal),
+//    .out(predict_regs_out)
+//);
 
 endmodule: fetch

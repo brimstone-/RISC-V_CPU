@@ -18,7 +18,7 @@ module gshare #(parameter sr_size = 3, parameter bht_size = 2**sr_size)(
 // PHT: 00 SN | 01 WN | 10 WT | 11 ST
 logic [1:0] branch_history_table [bht_size];
 logic [2:0] reg_out, bht_index, prev_bht_index;    // access pht (size 3: 2^3 = 8 = bht_size)
-logic load;
+logic branch;
 
 initial begin
 	reg_out = 3'b00;
@@ -31,7 +31,7 @@ end
 register #(.width(sr_size)) branch_history_register
 (
 	.clk,
-	.load,
+	.load(branch),
 	.reset(1'b0),
 	.in({reg_out[1:0], pcmux_sel}),
 	.out(bhr_out)
@@ -39,10 +39,11 @@ register #(.width(sr_size)) branch_history_register
 
 assign bht_index = fetch_pc[4:2] ^ bhr_out;
 assign prev_bht_index = exec_pc[4:2] ^ bhr_in;
+assign branch = (opcode == op_br | opcode == op_jal | opcode == op_jalr);
+
 
 always_ff @(posedge clk) begin
-	load = 0;
-	if(opcode == op_br | opcode == op_jal | opcode == op_jalr) begin
+	if(branch) begin
 		if (pcmux_sel) begin
 			case (branch_history_table[prev_bht_index])
 			 2'b00: branch_history_table[prev_bht_index] = 2'b01;
@@ -59,7 +60,6 @@ always_ff @(posedge clk) begin
 			 2'b11: branch_history_table[prev_bht_index] = 2'b10;
 			endcase
 		end
-		load = 1;
 	end
 	taken = branch_history_table[bht_index][1];
 end 

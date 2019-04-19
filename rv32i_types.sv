@@ -108,6 +108,7 @@ typedef struct packed {
 typedef struct packed {
 	logic [2:0] bhr;
 	logic taken;
+	logic [31:0] btb_address;
 } predict_regs;
 
 typedef logic [31:0] rv32i_word;
