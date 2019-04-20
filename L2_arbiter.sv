@@ -128,7 +128,7 @@ begin : state_actions
 			load_addr = 1;
 			load_wdata = 1;
 			load_type = 1;
-			transaction_type_in = 1;
+			transaction_type_in = 0;
 		end
 		prefetch: begin
 			addr_mux_sel = 1;
