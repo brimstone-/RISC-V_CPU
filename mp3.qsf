@@ -111,5 +111,10 @@ set_global_assignment -name SYSTEMVERILOG_FILE store_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE translate_lru.sv
 set_global_assignment -name SYSTEMVERILOG_FILE writeback.sv
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
-set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name SMART_RECOMPILE OFF
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "NORMAL COMPILATION"
+set_global_assignment -name FITTER_EFFORT "AUTO FIT"
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 1.0
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
