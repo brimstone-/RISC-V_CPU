@@ -31,7 +31,7 @@ rv32i_word addr_mux_out;
 logic addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
-logic load_type;
+logic load_type, pre_hit;
 logic transaction_type_in, transaction_type_out;
 
 assign pre_hit = L2_addr == pre_addr;
