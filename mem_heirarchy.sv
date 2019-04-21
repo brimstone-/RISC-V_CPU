@@ -80,8 +80,30 @@ rv32i_word pre_addr;
 logic [255:0] arb_pre_rdata;
 logic arb_pre_resp;
 
+// counter signals
+logic [31:0] icache_hit_count;
+logic [31:0] icache_miss_count;
+logic [31:0] l2_hit_count;
+logic [31:0] l2_miss_count;
+logic [31:0] ewb_writes_count;
+logic [31:0] branch_correct_count;
+logic [31:0] branch_incorrect_count;
+logic [31:0] prefetch_hit_count;
+logic [31:0] prefetch_read_count;
+
+logic icache_hit_reset;
+logic icache_miss_reset;
+logic l2_hit_reset;
+logic l2_miss_reset;
+logic ewb_writes_reset;
+logic branch_total_reset;
+logic branch_correct_reset;
+logic branch_incorrect_reset;
+logic prefetch_hit_reset;
+logic prefetch_read_reset;
+
 // icache
-o_cache icache
+i_cache icache
 (
 	.clk,
 
@@ -98,11 +120,16 @@ o_cache icache
 	.pmem_addr(cache_addr_a),
 	.pmem_resp(cache_resp_a),
 	.pmem_rdata(cache_rdata_a),
-	.pmem_wdata()
+	.pmem_wdata(),
+	
+	.icache_hit_count,
+	.icache_miss_count,
+	.icache_hit_reset,
+	.icache_miss_reset
 );
 
 // d cache
-o_cache dcache
+d_cache dcache
 (
 	.clk,
 
@@ -119,7 +146,29 @@ o_cache dcache
 	.pmem_addr(cache_addr_b),
 	.pmem_resp(cache_resp_b),
 	.pmem_rdata(cache_rdata_b),
-	.pmem_wdata(cache_wdata_b)
+	.pmem_wdata(cache_wdata_b),
+	
+   .icache_hit_count,
+   .icache_miss_count,
+   .l2_hit_count,
+   .l2_miss_count,
+   .ewb_writes_count,
+	.branch_total_count(),
+   .branch_correct_count(),
+   .branch_incorrect_count(),
+   .prefetch_hit_count,
+   .prefetch_read_count,
+	
+	.icache_hit_reset,
+	.icache_miss_reset,
+	.l2_hit_reset,
+	.l2_miss_reset,
+	.ewb_writes_reset,
+	.branch_total_reset(),
+	.branch_correct_reset(),
+	.branch_incorrect_reset(),
+	.prefetch_hit_reset,
+	.prefetch_read_reset
 );
 
 assign cache_rdata_a = arb_rdata_a;
@@ -169,7 +218,13 @@ L2_cache #(.s_index(4)) L2_cache
 	.pmem_addr(L2_addr),
 	.pmem_resp(L2_resp),
 	.pmem_rdata(L2_rdata),
-	.pmem_wdata(L2_wdata)
+	.pmem_wdata(L2_wdata),
+	
+	
+	.l2_hit_count,
+	.l2_miss_count,
+	.l2_hit_reset,
+	.l2_miss_reset
 );
 
 assign L2_resp = pre_resp | ewb_resp | L2_arb_resp;
@@ -194,7 +249,12 @@ prefetch prefetch
 	.pre_read,
 	.pre_addr,
 	.arb_pre_rdata,
-	.arb_pre_resp
+	.arb_pre_resp,
+	
+	.prefetch_hit_count,
+	.prefetch_read_count,
+	.prefetch_hit_reset,
+	.prefetch_read_reset
 );
 
 external_write_buffer ewb
@@ -210,7 +270,10 @@ external_write_buffer ewb
 	.ewb_write,
 	.ewb_wdata,
 	.ewb_addr,
-	.ewb_resp
+	.ewb_resp,
+	
+	.ewb_writes_count,
+	.ewb_writes_reset
 );
 
 L2_arbiter L2_arbiter

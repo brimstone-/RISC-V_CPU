@@ -12,7 +12,12 @@ module prefetch
 	output logic pre_read,
 	output rv32i_word pre_addr,
 	input [255:0] arb_pre_rdata,
-	input arb_pre_resp
+	input arb_pre_resp,
+	
+	output logic [31:0] prefetch_hit_count,
+	output logic [31:0] prefetch_read_count,
+	input logic prefetch_hit_reset,
+	input logic prefetch_read_reset
 );
 
 logic addr_hit;
@@ -23,6 +28,9 @@ logic load_addr;
 logic load_past_read;
 logic past_read_in;
 logic past_read_out;
+
+logic load_prefetch_hit, load_prefetch_read;
+logic [31:0] prefetch_hit_out, prefetch_read_out;
 
 register #(.width(256)) rdata_reg
 (
@@ -51,6 +59,26 @@ register #(.width(1)) past_read_reg
 	.out(past_read_out)
 );
 
+assign prefetch_hit_count = prefetch_hit_out;
+register #(.width(32)) prefetch_hit_reg
+(
+	.clk,
+	.load(load_prefetch_hit),
+	.reset(prefetch_hit_reset),
+	.in(prefetch_hit_out + 1),
+	.out(prefetch_hit_out)
+);
+
+assign prefetch_read_count = prefetch_read_out;
+register #(.width(32)) prefetch_read_reg
+(
+	.clk,
+	.load(load_prefetch_read),
+	.reset(prefetch_read_reset),
+	.in(prefetch_read_out + 1),
+	.out(prefetch_read_out)
+);
+
 enum int unsigned {
 	idle,
 	hit,
@@ -70,6 +98,9 @@ begin : state_actions
 	pre_read = 0;
 	pre_resp = 0;
 	
+	load_prefetch_hit = 0;
+	load_prefetch_read = 0;
+	
 	case(state)
 		idle: ;
 		hit: begin
@@ -77,6 +108,7 @@ begin : state_actions
 			load_addr = 1;
 			load_past_read = 1;
 			past_read_in = 1;
+			load_prefetch_hit = 1;
 		end
 		load_regs: begin
 			load_addr = 1;
@@ -91,6 +123,7 @@ begin : state_actions
 		finish: begin
 			load_past_read = 1;
 			past_read_in = 0;
+			load_prefetch_read = 1;
 		end
 		default: ;
 	endcase

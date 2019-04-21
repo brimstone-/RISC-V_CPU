@@ -1,4 +1,4 @@
-module L2_cache #(
+module d_cache #(
 	parameter s_offset = 5,
    parameter s_index  = 3,
    parameter s_tag    = 32 - s_offset - s_index,
@@ -12,8 +12,9 @@ module L2_cache #(
 	
 	input logic mem_read,
 	input logic mem_write,
-	input logic [255:0] mem_wdata,
-	output logic [255:0] mem_rdata,
+	input logic [31:0] mem_wdata,
+	output logic [31:0] mem_rdata,
+	input logic [3:0] mem_byte_enable,
 	output logic mem_resp,
 	
 	input logic pmem_resp,
@@ -23,13 +24,30 @@ module L2_cache #(
 	output logic [s_line-1:0] pmem_wdata,
 	output logic pmem_write,
 	
-	output logic [31:0] l2_hit_count,
-	output logic [31:0] l2_miss_count,
-	input l2_hit_reset,
-	input l2_miss_reset
+   input [31:0] icache_hit_count,
+   input [31:0] icache_miss_count,
+   input [31:0] l2_hit_count,
+   input [31:0] l2_miss_count,
+   input [31:0] ewb_writes_count,
+	input [31:0] branch_total_count,
+   input [31:0] branch_correct_count,
+   input [31:0] branch_incorrect_count,
+   input [31:0] prefetch_hit_count,
+   input [31:0] prefetch_read_count,
+	
+	output logic icache_hit_reset,
+	output logic icache_miss_reset,
+	output logic l2_hit_reset,
+	output logic l2_miss_reset,
+	output logic ewb_writes_reset,
+	output logic branch_total_reset,
+	output logic branch_correct_reset,
+	output logic branch_incorrect_reset,
+	output logic prefetch_hit_reset,
+	output logic prefetch_read_reset
 );
 
-logic [31:0] mem_byte_enable256, pmem_address;
+logic [31:0] mem_byte_enable256, pmem_address, cache_mem_rdata;
 logic dirty_load [2];
 logic valid_load [2];
 logic data_read, pmem_load;
@@ -45,9 +63,11 @@ logic [s_index-1:0] index;
 logic read, hit, lru_out, datamux_sel, dirty_in, pmem_r, pmem_w;
 logic [1:0] writemux_sel [2];
 logic [s_line-1:0] mem_wdata256, mem_rdata256;
-
+logic special_addr;
 logic load_hit_counter, load_miss_counter;
+logic hit_counter_reset, miss_counter_reset;
 logic [31:0] hit_counter_out, miss_counter_out;
+counter_addr special_address;
 
 assign tag = mem_addr[31:(s_index + s_offset)];
 assign index = mem_addr[(s_index + s_offset-1):s_offset];
@@ -55,11 +75,21 @@ assign read = mem_read | mem_write;
 assign hit_way[0] = (valid_out[0] && (tag == tag_out[0]));
 assign hit_way[1] = (valid_out[1] && (tag == tag_out[1]));
 assign hit = hit_way[0] | hit_way[1];
+assign special_address = counter_addr'(mem_addr);
+assign special_addr = (special_address == icache_hit)
+                    | (special_address == icache_miss)
+                    | (special_address == dcache_hit)
+                    | (special_address == dcache_miss)
+                    | (special_address == l2_hit)
+                    | (special_address == l2_miss)
+                    | (special_address == ewb_writes)
+                    | (special_address == branch_total)
+                    | (special_address == branch_correct)
+                    | (special_address == branch_incorrect)
+                    | (special_address == prefetch_hit)
+                    | (special_address == prefetch_read);
 
-assign mem_wdata256 = mem_wdata;
-assign mem_rdata = mem_rdata256;
-assign mem_byte_enable256 = {32{1'b1}};
-assign pmem_load = read;
+
 
 array #(.s_index(s_index), .width(1)) dirty [2] 
 (
@@ -139,6 +169,8 @@ mux2 #(.width(s_line)) data_out_mux
 	.f(mem_rdata256)
 );
 
+assign pmem_load = read;
+
 register #(.width(s_line)) pmem_wdata_reg
 (
 	.clk,
@@ -175,22 +207,31 @@ register #(.width(1)) pmem_write_reg
 	.out(pmem_write)
 );
 
-assign l2_hit_count = hit_counter_out;
+bus_adapter adapter 
+(
+	.mem_wdata256,
+	.mem_rdata256,
+	.mem_wdata,
+	.mem_rdata(cache_mem_rdata),
+	.mem_byte_enable,
+	.mem_byte_enable256,
+	.address(mem_addr)
+);
+
 register #(.width(32)) hit_counter
 (
 	.clk,
 	.load(load_hit_counter),
-	.reset(l2_hit_reset),
+	.reset(hit_counter_reset),
 	.in(hit_counter_out + 1),
 	.out(hit_counter_out)
 );
 
-assign l2_miss_count = miss_counter_out;
 register #(.width(32)) miss_counter
 (
 	.clk,
 	.load(load_miss_counter),
-	.reset(l2_miss_reset),
+	.reset(miss_counter_reset),
 	.in(miss_counter_out + 1),
 	.out(miss_counter_out)
 );
@@ -247,15 +288,30 @@ begin : state_actions
 	valid_load[1] = 0;
 	load_hit_counter = 0;
 	load_miss_counter = 0;
+	icache_hit_reset = 0;
+	icache_miss_reset = 0;
+	hit_counter_reset = 0;
+	miss_counter_reset = 0;
+	l2_hit_reset = 0;
+	l2_miss_reset = 0;
+	ewb_writes_reset = 0;
+	branch_total_reset = 0;
+	branch_correct_reset = 0;
+	branch_incorrect_reset = 0;
+	prefetch_hit_reset = 0;
+	prefetch_read_reset = 0;
+	mem_rdata = cache_mem_rdata;
 	
 	case(state)
 		check_tag:
 		begin
 			mem_resp = hit && read;
+			
 			if(read)
 			begin
 				data_read = 1;
 			end
+			
 			if(hit)
 			begin
 				datamux_sel = hit_way[1];
@@ -266,11 +322,51 @@ begin : state_actions
 					dirty_load[hit_way[1]] = 1;
 				end
 			end
-			if ((mem_read | mem_write) & hit) begin
-				load_hit_counter = 1;
-			end
-			else if ((mem_read | mem_write) & ~hit) begin
-				load_miss_counter = 1;
+			
+			case ({mem_read,mem_write,hit})
+				3'b101: load_hit_counter = 1;
+				3'b011: load_hit_counter = 1;
+				3'b100: load_miss_counter = 1;
+				3'b010: load_miss_counter = 1;
+				default:;
+			endcase
+			
+			if(special_addr)
+			begin
+				mem_resp = 1;
+				if (mem_read) begin
+					case(special_address)
+						icache_hit       : mem_rdata = icache_hit_count;
+						icache_miss      : mem_rdata = icache_miss_count;
+						dcache_hit       : mem_rdata = hit_counter_out;
+						dcache_miss      : mem_rdata = miss_counter_out;
+						l2_hit           : mem_rdata = l2_hit_count;
+						l2_miss          : mem_rdata = l2_miss_count;
+						ewb_writes       : mem_rdata = ewb_writes_count;
+						branch_total     : mem_rdata = branch_total_count;
+						branch_correct   : mem_rdata = branch_correct_count;
+						branch_incorrect : mem_rdata = branch_incorrect_count;
+						prefetch_hit     : mem_rdata = prefetch_hit_count;
+						prefetch_read    : mem_rdata = prefetch_read_count;
+						default:;
+					endcase
+				end
+				else if (mem_write) begin
+					case (special_address)
+						icache_hit       : icache_hit_reset = 1;
+						icache_miss      : icache_miss_reset = 1;
+						dcache_hit       : hit_counter_reset = 1;
+						dcache_miss      : miss_counter_reset = 1;
+                  l2_hit           : l2_hit_reset = 1;
+                  l2_miss          : l2_miss_reset = 1;
+                  ewb_writes       : ewb_writes_reset = 1;
+                  branch_total     : branch_total_reset = 1;
+                  branch_correct   : branch_correct_reset = 1;
+                  branch_incorrect : branch_incorrect_reset = 1;
+                  prefetch_hit     : prefetch_hit_reset = 1;
+                  prefetch_read    : prefetch_read_reset = 1;
+					endcase
+				end
 			end
 		end
 		allocate:
@@ -303,4 +399,4 @@ begin: next_state_assignment
 	 state <= next_state;
 end
 
-endmodule : L2_cache
+endmodule : d_cache

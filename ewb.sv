@@ -13,10 +13,14 @@ module external_write_buffer
 	output logic ewb_write, // write signal going to arb
 	output rv32i_word ewb_addr, // address going to arb
 	output logic [255:0] ewb_wdata, // wdata going to arb
-	input arb_ewb_resp // resp from arb
+	input arb_ewb_resp, // resp from arb
+	
+	output logic [31:0] ewb_writes_count,
+	input ewb_writes_reset
 );
 
 logic load;
+logic [31:0] ewb_writes_out;
 
 register #(.width(256)) wdata_reg 
 (
@@ -34,6 +38,16 @@ register #(.width(32)) addr_reg
 	.reset(1'b0),
 	.in(cache_addr),
 	.out(ewb_addr)
+);
+
+assign ewb_writes_count = ewb_writes_out;
+register #(.width(32)) ewb_writes_reg
+(
+	.clk,
+	.load,
+	.reset(ewb_writes_reset),
+	.in(ewb_writes_out + 1),
+	.out(ewb_writes_out)
 );
 
 enum int unsigned {
