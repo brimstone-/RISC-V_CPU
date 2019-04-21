@@ -4,11 +4,11 @@ module external_write_buffer
 (
 	input clk,
 
-	input [255:0] cache_wdata_b, // wdata from dcache
-	input cache_read_b, // signal from dcache
-	input cache_write_b, // signal from dcache
-	output logic ewb_resp_b, // resp going back to dcache
-	input [31:0] cache_addr_b, // addr from dcache
+	input [255:0] cache_wdata, // wdata from dcache
+	input cache_read, // signal from dcache
+	input cache_write, // signal from dcache
+	output logic ewb_resp, // resp going back to dcache
+	input [31:0] cache_addr, // addr from dcache
 	
 	output logic ewb_write, // write signal going to arb
 	output rv32i_word ewb_addr, // address going to arb
@@ -23,7 +23,7 @@ register #(.width(256)) wdata_reg
 	.clk,
 	.load,
 	.reset(1'b0),
-	.in(cache_wdata_b),
+	.in(cache_wdata),
 	.out(ewb_wdata)
 );
 
@@ -32,7 +32,7 @@ register #(.width(32)) addr_reg
 	.clk,
 	.load,
 	.reset(1'b0),
-	.in(cache_addr_b),
+	.in(cache_addr),
 	.out(ewb_addr)
 );
 
@@ -46,7 +46,7 @@ enum int unsigned {
 always_comb
 begin : state_actions
 	/* Default output assignments */
-	ewb_resp_b = 0;
+	ewb_resp = 0;
 	ewb_write = 0;
 	load = 0;
 	
@@ -54,7 +54,7 @@ begin : state_actions
 		idle: ;
 		store: begin
 			load = 1;
-			ewb_resp_b = 1;
+			ewb_resp = 1;
 		end
 		waiting: ;
 		write: begin
@@ -69,14 +69,14 @@ begin : next_state_logic
 	next_state = state;
 	case(state)
 		idle: begin
-			if (cache_write_b) next_state = store;
+			if (cache_write) next_state = store;
 			else next_state = idle;
 		end
 		store: begin
 			next_state = waiting;
 		end
 		waiting: begin
-			if (cache_read_b) next_state = waiting;
+			if (cache_read) next_state = waiting;
 			else next_state = write;
 		end
 		write: begin

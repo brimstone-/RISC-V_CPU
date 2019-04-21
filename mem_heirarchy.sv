@@ -46,13 +46,13 @@ logic [255:0] cache_rdata_b;
 logic [255:0] cache_wdata_b;
 
 // ewb
-logic ewb_resp_b;
+logic ewb_resp;
 logic ewb_write;
 logic [255:0] ewb_wdata;
 logic arb_ewb_resp;
 rv32i_word ewb_addr;
 
-// arbiter
+// L2 arbiter
 logic arb_resp_a;
 logic arb_resp_b;
 
@@ -101,10 +101,6 @@ o_cache icache
 	.pmem_wdata()
 );
 
-assign cache_rdata_a = arb_rdata_a;
-assign cache_resp_a = arb_resp_a;
-assign cache_resp_b = arb_resp_b | ewb_resp_b;
-
 // d cache
 o_cache dcache
 (
@@ -126,21 +122,9 @@ o_cache dcache
 	.pmem_wdata(cache_wdata_b)
 );
 
-external_write_buffer ewb
-(
-	.clk,
-	
-	.cache_read_b,
-	.cache_write_b,
-	.cache_addr_b,
-	.cache_wdata_b,
-
-	.arb_ewb_resp,
-	.ewb_write,
-	.ewb_wdata,
-	.ewb_addr,
-	.ewb_resp_b
-);
+assign cache_rdata_a = arb_rdata_a;
+assign cache_resp_a = arb_resp_a;
+assign cache_resp_b = arb_resp_b;
 
 L1_arbiter L1_arbiter
 (
@@ -151,17 +135,13 @@ L1_arbiter L1_arbiter
 	.cache_addr_a,
 	.arb_rdata_a,
 	.arb_resp_a,
-
-	// ewb
-	.arb_ewb_resp,
-	.ewb_write,
-	.ewb_wdata,
-	.ewb_addr,
 	
 	// dcache
 	.cache_read_b,
+	.cache_write_b,
 	.cache_addr_b,
 	.cache_rdata_b,
+	.cache_wdata_b,
 	.arb_resp_b,
 
 	// pmem
@@ -183,7 +163,7 @@ L2_cache #(.s_index(4)) L2_cache
 	.mem_rdata(L1_rdata),
 	.mem_wdata(L1_wdata),
 	.mem_resp(L1_resp),
-	
+
 	.pmem_read(L2_read),
 	.pmem_write(L2_write),
 	.pmem_addr(L2_addr),
@@ -192,7 +172,7 @@ L2_cache #(.s_index(4)) L2_cache
 	.pmem_wdata(L2_wdata)
 );
 
-assign L2_resp = pre_resp | L2_arb_resp;
+assign L2_resp = pre_resp | ewb_resp | L2_arb_resp;
 
 mux2 #(.width(256)) L2_rdata_mux
 (
@@ -217,16 +197,30 @@ prefetch prefetch
 	.arb_pre_resp
 );
 
+external_write_buffer ewb
+(
+	.clk,
+	
+	.cache_read(L2_read),
+	.cache_write(L2_write),
+	.cache_addr(L2_addr),
+	.cache_wdata(L2_wdata),
+
+	.arb_ewb_resp,
+	.ewb_write,
+	.ewb_wdata,
+	.ewb_addr,
+	.ewb_resp
+);
+
 L2_arbiter L2_arbiter
 (
 	.clk,
 
 	// from/to L2
 	.L2_read,
-	.L2_write,
 	.L2_addr,
 	.L2_rdata(L2_arb_rdata),
-	.L2_wdata,
 	.L2_arb_resp,
 	
 	// from/to prefetcher
@@ -234,6 +228,12 @@ L2_arbiter L2_arbiter
 	.pre_addr,
 	.arb_pre_rdata,
 	.arb_pre_resp,
+
+	// ewb
+	.arb_ewb_resp,
+	.ewb_write,
+	.ewb_wdata,
+	.ewb_addr,
 	
 	// pmem
 	.pmem_read,
@@ -243,7 +243,5 @@ L2_arbiter L2_arbiter
 	.pmem_rdata,
 	.pmem_wdata
 );
-
-// maybe put registers between L2_cache and pmem here, incur cycle delay, increase fmax
 
 endmodule : mem_heirarchy

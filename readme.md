@@ -11,5 +11,5 @@
 
 ## Status
 - Succesfully runs mp3-final.s, comp1.s, and comp2.s
-- Fmax using Stratix III device: 156.99 Mhz
+- Fmax using Stratix III device: 159.41 Mhz
 
