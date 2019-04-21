@@ -6,10 +6,8 @@ module L2_arbiter
 
 	// from/to L2
 	input L2_read,
-	input L2_write,
 	input rv32i_word L2_addr,
 	output logic [255:0] L2_rdata,
-	input [255:0] L2_wdata,
 	output logic L2_arb_resp,
 	
 	// from/to prefetcher
@@ -17,6 +15,11 @@ module L2_arbiter
 	input rv32i_word pre_addr,
 	output logic [255:0] arb_pre_rdata,
 	output logic arb_pre_resp,
+	
+	output logic arb_ewb_resp,
+	input ewb_write,
+	input [255:0] ewb_wdata,
+	input rv32i_word ewb_addr,
 	
 	// pmem
 	output logic pmem_read,
@@ -28,19 +31,21 @@ module L2_arbiter
 );
 
 rv32i_word addr_mux_out;
-logic addr_mux_sel;
+logic [1:0] addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
-logic load_type;
-logic transaction_type_in, transaction_type_out;
+logic load_type, pre_hit;
+logic [1:0] transaction_type_in, transaction_type_out;
 
 assign pre_hit = L2_addr == pre_addr;
 
-mux2 addr_mux
+mux4 addr_mux
 (
 	.sel(addr_mux_sel),
 	.a(L2_addr),
 	.b(pre_addr),
+	.c(ewb_addr),
+	.d(),
 	.f(addr_mux_out)
 );
 
@@ -70,15 +75,16 @@ register #(.width(256)) wdata_reg
 	.clk,
 	.load(load_wdata),
 	.reset(1'b0),
-	.in(L2_wdata),
+	.in(ewb_wdata),
 	.out(pmem_wdata)
 );
 
 /*
-	0 = demand read/write
+	0 = demand read
 	1 = prefetch
+	2 = ewb write
 */
-register #(.width(1)) transaction_type_reg
+register #(.width(2)) transaction_type_reg
 (
 	.clk,
 	.load(load_type),
@@ -107,13 +113,14 @@ begin : state_actions
 	load_wdata = 0;
 
 	load_type = 0;
-	transaction_type_in = 0;
+	transaction_type_in = 2'b0;
 
 	pmem_read = 0;
 	pmem_write = 0;
 
 	L2_arb_resp = 0;
 	arb_pre_resp = 0;
+	arb_ewb_resp = 0;
 
 	case(state)
 		idle: ;
@@ -124,11 +131,11 @@ begin : state_actions
 			transaction_type_in = 0;
 		end
 		demand_write: begin
-			addr_mux_sel = 0;
+			addr_mux_sel = 2;
 			load_addr = 1;
 			load_wdata = 1;
 			load_type = 1;
-			transaction_type_in = 0;
+			transaction_type_in = 2;
 		end
 		prefetch: begin
 			addr_mux_sel = 1;
@@ -147,6 +154,7 @@ begin : state_actions
 			case (transaction_type_out)
 				0: L2_arb_resp = 1;
 				1: arb_pre_resp = 1;
+				2: arb_ewb_resp = 1;
 				default: ;
 			endcase // transaction_type_out
 		end
@@ -160,7 +168,7 @@ begin : next_state_logic
 	case(state)
 		idle: begin
 			if (L2_read & ~pre_hit) next_state = demand_read;
-			else if (L2_write) next_state = demand_write;
+			else if (ewb_write) next_state = demand_write;
 			else if (pre_read) next_state = prefetch;
 			else next_state = idle;
 		end

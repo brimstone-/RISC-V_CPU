@@ -1,0 +1,27 @@
+<internal_error>
+<sub_system>ERR</sub_system>
+<callstack>
+	0x7f22ef4fd171: ccl_err + 0x8171 (_ZN15ERR_STACKWALKER15get_stack_traceEPPKviiPv + 0xb1)
+	0x7f22ef500015: ccl_err + 0xb015 (_Z14err_terminatorv + 0x4b)
+	0x7f22e6ed2796: stdc++.so.6 + 0x63796 (_ZN10__cxxabiv111__terminateEPFvvE + 0x6)
+	0x7f22e6ed27c3: stdc++.so.6 + 0x637c3
+	0x7f22e6ed2a36: stdc++.so.6 + 0x63a36 (__cxa_rethrow + 0x46)
+	0x7f2312f265ce: QtCore.so.4 + 0x1a65ce (_ZN16QCoreApplication14notifyInternalEP7QObjectP6QEvent + 0x9e)
+	0x7f22ec4a6848: QtGui.so.4 + 0x25a848 (_ZN14QWidgetPrivate12close_helperENS_9CloseModeE + 0x1f8)
+	0x7f22ec4a6932: QtGui.so.4 + 0x25a932 (_ZN7QWidget5closeEv + 0x12)
+	0x7f232350cdcb: sys_qui + 0x98dcb (_ZN13QUI_FRAME_WND17close_all_in_listE5QListIP13QMdiSubWindowES2_5_GUID + 0x1c5)
+	0x7f232350d084: sys_qui + 0x99084 (_ZN13QUI_FRAME_WND17close_all_windowsE5_GUID + 0xe6)
+	0x7f232352f81e: sys_qui + 0xbb81e (_ZN14QUI_PRJ_UI_MGR22close_windows_by_clsidERK5_GUID + 0x22)
+	0x7f22ca933c82: sys_sscq + 0xec82 (_ZN14SSCQ_JS_BRIDGE11close_frameEv + 0x3c)
+	0x7f22ca934030: sys_sscq + 0xf030 (_ZN14SSCQ_JS_BRIDGE12open_projectERK7QString + 0x1f0)
+	0x7f22ca93446a: sys_sscq + 0xf46a (_ZN14SSCQ_JS_BRIDGE18qt_static_metacallEP7QObjectN11QMetaObject4CallEiPPv + 0x84)
+	0x7f22ca934640: sys_sscq + 0xf640 (_ZN14SSCQ_JS_BRIDGE11qt_metacallEN11QMetaObject4CallEiPPv + 0x46)
+	0x7f22ea0a3a05: QtWebKit.so.4 + 0x92aa05
+	0x7f22ea951ed5: QtWebKit.so.4 + 0x11d8ed5
+	0x7f228953d38e:
+</callstack>
+<error>*** Fatal Error: Unhandled Exception</error>
+<date>Sat Apr 20 19:48:04 2019
+</date>
+<version>Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition</version>
+</internal_error>

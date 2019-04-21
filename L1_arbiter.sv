@@ -9,17 +9,13 @@ module L1_arbiter
 	input rv32i_word cache_addr_a,
 	output logic [255:0] arb_rdata_a,
 	output logic arb_resp_a,
-	
-	// ewb (demand write b)
-	output logic arb_ewb_resp,
-	input ewb_write,
-	input rv32i_word ewb_addr,
-	input [255:0] ewb_wdata,
-	
-	// dcache (demand read b)
+
+	// dcache (demand read/write b)
 	input cache_read_b,
+	input cache_write_b,
 	input rv32i_word cache_addr_b,
 	output logic [255:0] cache_rdata_b,
+	input [255:0] cache_wdata_b,
 	output logic arb_resp_b,
 	
 	// pmem
@@ -32,19 +28,17 @@ module L1_arbiter
 );
 
 rv32i_word addr_mux_out;
-logic [1:0] addr_mux_sel;
+logic addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
 logic load_type;
-logic [1:0] transaction_type_in, transaction_type_out;
+logic transaction_type_in, transaction_type_out;
 
-mux4 addr_mux
+mux2 addr_mux
 (
 	.sel(addr_mux_sel),
 	.a(cache_addr_a), // demand read a
-	.b(cache_addr_b), // demand read b
-	.c(ewb_addr),     // demand write b
-	.d(),
+	.b(cache_addr_b), // demand read/write b
 	.f(addr_mux_out)
 );
 
@@ -74,16 +68,15 @@ register #(.width(256)) wdata_reg
 	.clk,
 	.load(load_wdata),
 	.reset(1'b0),
-	.in(ewb_wdata),
+	.in(cache_wdata_b),
 	.out(pmem_wdata)
 );
 
 /*
 	0 = read a
-	1 = read b
-	2 = write b
+	1 = read/write b
 */
-register #(.width(2)) transaction_type_reg
+register #(.width(1)) transaction_type_reg
 (
 	.clk,
 	.load(load_type),
@@ -119,7 +112,6 @@ begin : state_actions
 
 	arb_resp_a = 0;
 	arb_resp_b = 0;
-	arb_ewb_resp = 0;
 
 	case(state)
 		idle: ;
@@ -136,11 +128,11 @@ begin : state_actions
 			transaction_type_in = 1;
 		end
 		write_b: begin
-			addr_mux_sel = 2;
+			addr_mux_sel = 1;
 			load_addr = 1;
 			load_wdata = 1;
 			load_type = 1;
-			transaction_type_in = 2;
+			transaction_type_in = 1;
 		end
 		reading: begin
 			pmem_read = 1;
@@ -153,7 +145,6 @@ begin : state_actions
 			case (transaction_type_out)
 				0: arb_resp_a = 1;
 				1: arb_resp_b = 1;
-				2: arb_ewb_resp = 1;
 				default: ;
 			endcase // transaction_type_out
 		end
@@ -167,8 +158,8 @@ begin : next_state_logic
 	case(state)
 		idle: begin
 			if (cache_read_a) next_state = read_a;
-			else if (ewb_write) next_state = write_b;
 			else if (cache_read_b) next_state = read_b;
+			else if (cache_write_b) next_state = write_b;
 			else next_state = idle;
 		end
 
