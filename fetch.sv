@@ -39,7 +39,9 @@ logic [3:0] select;
 
 logic load_branch_total;
 logic load_branch_correct;
+logic load_branch_correct_final;
 logic load_branch_incorrect;
+logic load_branch_incorrect_final;
 
 logic [31:0] branch_total_out;
 logic [31:0] branch_correct_out;
