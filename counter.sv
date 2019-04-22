@@ -2,8 +2,6 @@ import rv32i_types::*;
 
 module counter
 (
-	input clk,
-	
    input rv32i_word mem_addr,
 	input mem_read, mem_write,
 	output logic read_b_counter,
@@ -45,7 +43,7 @@ rv32i_word mem_rdata;
 
 assign tag = counter_addr'(mem_addr[7:0]);
 
-assign addr_hit = (tag == icache_hit)
+assign addr_hit = ((tag == icache_hit)
                 | (tag == icache_miss)
                 | (tag == dcache_hit)
                 | (tag == dcache_miss)
@@ -56,7 +54,8 @@ assign addr_hit = (tag == icache_hit)
                 | (tag == branch_correct)
                 | (tag == branch_incorrect)
                 | (tag == prefetch_hit)
-                | (tag == prefetch_read);
+                | (tag == prefetch_read))
+					 & (mem_addr[31:8] == 24'h000000);
 
 assign mem_rdata_out = mem_rdata;
 assign read_b_counter = mem_read & ~addr_hit;

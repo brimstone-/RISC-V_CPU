@@ -19,13 +19,13 @@ module cpu
 	input resp_b,
 	input rv32i_word rdata_b,
 	
-    output logic [31:0] branch_total_count,
-    output logic [31:0] branch_correct_count,
-    output logic [31:0] branch_incorrect_count,
+	output logic [31:0] branch_total_count,
+	output logic [31:0] branch_correct_count,
+	output logic [31:0] branch_incorrect_count,
     
-    input logic branch_total_reset,
-    input logic branch_correct_reset,
-    input logic branch_incorrect_reset
+	input logic branch_total_reset,
+	input logic branch_correct_reset,
+	input logic branch_incorrect_reset
 );
 
 
