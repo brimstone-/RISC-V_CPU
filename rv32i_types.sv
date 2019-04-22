@@ -58,6 +58,21 @@ typedef enum bit [2:0] {
     alu_and = 3'b111
 } alu_ops;
 
+typedef enum bit [7:0] {
+   icache_hit       = 8'h00,
+   icache_miss      = 8'h04,
+   dcache_hit       = 8'h08,
+   dcache_miss      = 8'h0c,
+   l2_hit           = 8'h10,
+   l2_miss          = 8'h14,
+   ewb_writes       = 8'h18,
+   branch_total     = 8'h1c,
+   branch_correct   = 8'h20,
+   branch_incorrect = 8'h24,
+   prefetch_hit     = 8'h28,
+   prefetch_read    = 8'h2c
+} counter_addr;
+
 typedef struct packed {
 	rv32i_opcode opcode;
 	alu_ops aluop;

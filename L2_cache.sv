@@ -21,7 +21,12 @@ module L2_cache #(
 	input logic [s_line-1:0] pmem_rdata,
 	output logic [31:0] pmem_addr,
 	output logic [s_line-1:0] pmem_wdata,
-	output logic pmem_write
+	output logic pmem_write,
+	
+	output logic [31:0] l2_hit_count,
+	output logic [31:0] l2_miss_count,
+	input l2_hit_reset,
+	input l2_miss_reset
 );
 
 logic [31:0] mem_byte_enable256, pmem_address;
@@ -40,6 +45,9 @@ logic [s_index-1:0] index;
 logic read, hit, lru_out, datamux_sel, dirty_in, pmem_r, pmem_w;
 logic [1:0] writemux_sel [2];
 logic [s_line-1:0] mem_wdata256, mem_rdata256;
+
+logic load_hit_counter, load_miss_counter;
+logic [31:0] hit_counter_out, miss_counter_out;
 
 assign tag = mem_addr[31:(s_index + s_offset)];
 assign index = mem_addr[(s_index + s_offset-1):s_offset];
@@ -167,6 +175,26 @@ register #(.width(1)) pmem_write_reg
 	.out(pmem_write)
 );
 
+assign l2_hit_count = hit_counter_out;
+register #(.width(32)) hit_counter
+(
+	.clk,
+	.load(load_hit_counter),
+	.reset(l2_hit_reset),
+	.in(hit_counter_out + 1),
+	.out(hit_counter_out)
+);
+
+assign l2_miss_count = miss_counter_out;
+register #(.width(32)) miss_counter
+(
+	.clk,
+	.load(load_miss_counter),
+	.reset(l2_miss_reset),
+	.in(miss_counter_out + 1),
+	.out(miss_counter_out)
+);
+
 enum int unsigned {
 	check_tag,
 	allocate,
@@ -217,6 +245,9 @@ begin : state_actions
 	dirty_load[1] = 0;
 	valid_load[0] = 0;
 	valid_load[1] = 0;
+	load_hit_counter = 0;
+	load_miss_counter = 0;
+	
 	case(state)
 		check_tag:
 		begin
@@ -234,6 +265,12 @@ begin : state_actions
 					dirty_in = 1;
 					dirty_load[hit_way[1]] = 1;
 				end
+			end
+			if ((mem_read | mem_write) & hit) begin
+				load_hit_counter = 1;
+			end
+			else if ((mem_read | mem_write) & ~hit) begin
+				load_miss_counter = 1;
 			end
 		end
 		allocate:
