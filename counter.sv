@@ -60,10 +60,10 @@ assign addr_hit = ((tag == icache_hit)
 assign mem_rdata_out = mem_rdata;
 assign read_b_counter = mem_read & ~addr_hit;
 assign write_counter = mem_write & ~addr_hit;
-assign mem_resp = addr_hit & (mem_read | mem_write);
 
 always_comb
 begin
+	mem_resp = 0;
 	mem_rdata = mem_rdata_in;
 	icache_hit_reset = 0;
 	icache_miss_reset = 0;
@@ -79,6 +79,7 @@ begin
 	prefetch_read_reset = 0;
 
 	if (mem_read & addr_hit) begin
+		mem_resp = 1;
 		case (tag)
 			icache_hit       : mem_rdata = icache_hit_count;
 			icache_miss      : mem_rdata = icache_miss_count;
@@ -95,6 +96,7 @@ begin
 		endcase
 	end
 	else if (mem_write & addr_hit) begin
+		mem_resp = 1;
 		case (tag)
 			icache_hit       : icache_hit_reset = 1;
 			icache_miss      : icache_miss_reset = 1;

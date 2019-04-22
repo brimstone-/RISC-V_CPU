@@ -64,6 +64,13 @@ set_global_assignment -name EDA_TEST_BENCH_FILE physical_memory.sv -section_id m
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
+set_global_assignment -name SMART_RECOMPILE OFF
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "NORMAL COMPILATION"
+set_global_assignment -name FITTER_EFFORT "AUTO FIT"
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 1.0
 set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE array.sv
@@ -71,6 +78,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE btb.sv
 set_global_assignment -name SYSTEMVERILOG_FILE bus_adapter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cache_heirarchy.sv
 set_global_assignment -name SYSTEMVERILOG_FILE control_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE counter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cmp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE data_array.sv
@@ -110,12 +118,4 @@ set_global_assignment -name SYSTEMVERILOG_FILE shift_register.sv
 set_global_assignment -name SYSTEMVERILOG_FILE store_mask.sv
 set_global_assignment -name SYSTEMVERILOG_FILE translate_lru.sv
 set_global_assignment -name SYSTEMVERILOG_FILE writeback.sv
-set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
-set_global_assignment -name SMART_RECOMPILE OFF
-set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
-set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
-set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "NORMAL COMPILATION"
-set_global_assignment -name FITTER_EFFORT "AUTO FIT"
-set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 1.0
-set_global_assignment -name SYSTEMVERILOG_FILE counter.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

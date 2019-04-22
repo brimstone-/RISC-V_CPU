@@ -173,20 +173,22 @@ register #(.width(32)) branch_total_reg
 );
 
 assign branch_correct_count = branch_correct_out;
+assign load_branch_correct_final = load_branch_correct & load_branch_total;
 register #(.width(32)) branch_correct_reg
 (
 	.clk,
-	.load(load_branch_correct),
+	.load(load_branch_correct_final),
 	.reset(branch_correct_reset),
 	.in(branch_correct_out + 1),
 	.out(branch_correct_out)
 );
 
 assign branch_incorrect_count = branch_incorrect_out;
+assign load_branch_incorrect_final = load_branch_incorrect & load_branch_total;
 register #(.width(32)) branch_incorrect_reg
 (
 	.clk,
-	.load(load_branch_incorrect),
+	.load(load_branch_incorrect_final),
 	.reset(branch_incorrect_reset),
 	.in(branch_incorrect_out + 1),
 	.out(branch_incorrect_out)
