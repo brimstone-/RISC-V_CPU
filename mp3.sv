@@ -29,6 +29,15 @@ rv32i_word wdata;
 logic resp_b;
 rv32i_word rdata_b;
 
+// counter signals
+logic [31:0] branch_total_count;
+logic [31:0] branch_correct_count;
+logic [31:0] branch_incorrect_count;
+
+logic branch_total_reset;
+logic branch_correct_reset;
+logic branch_incorrect_reset;
+
 cpu cpu
 (
 	.*
@@ -37,31 +46,7 @@ cpu cpu
 //cache_heirarchy cache_datapath
 mem_heirarchy mem_heirarchy
 (
-	.clk,
-
-	// port A
-	.read_a,
-	.address_a,
-	.resp_a,
-	.rdata_a,
-
-	// port B
-	.read_b,
-	.write,
-	.wmask,
-	.address_b,
-	.wdata,
-	.resp_b,
-	.rdata_b,
-	
-	// pmem
-	.pmem_resp,
-	//.pmem_error,
-	.pmem_rdata,
-	.pmem_wdata,
-	.pmem_read,
-	.pmem_write,
-	.pmem_address
+	.*
 );
 
 endmodule : mp3

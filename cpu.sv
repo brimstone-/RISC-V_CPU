@@ -17,7 +17,15 @@ module cpu
 	output rv32i_word address_b,
 	output rv32i_word wdata,
 	input resp_b,
-	input rv32i_word rdata_b
+	input rv32i_word rdata_b,
+	
+    output logic [31:0] branch_total_count,
+    output logic [31:0] branch_correct_count,
+    output logic [31:0] branch_incorrect_count,
+    
+    input logic branch_total_reset,
+    input logic branch_correct_reset,
+    input logic branch_incorrect_reset
 );
 
 
@@ -65,7 +73,15 @@ fetch stage_one
     .predict_regs_out(predict_fetch),
 	 .pc,
 	 .stall_in(stallreg_in),
-	 .predict_addr
+	 .predict_addr,
+	 
+	 .branch_total_count,
+	 .branch_correct_count,
+	 .branch_incorrect_count,
+    
+	 .branch_total_reset,
+	 .branch_correct_reset,
+	 .branch_incorrect_reset
 );
 
 decode stage_two
