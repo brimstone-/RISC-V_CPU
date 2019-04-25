@@ -32,7 +32,6 @@ rv32i_word pc_out;
 rv32i_word target;
 rv32i_word taken_mux_out, not_taken_mux_out;
 
-logic [2:0] bhr;
 logic taken, taken_hit, btb_hit;
 logic [1:0] mux_sel;
 logic [3:0] select;
@@ -128,7 +127,7 @@ begin
 	read_a = resp_b;
 end
 
-gshare branch_predictor
+gshare #(.sr_size(6)) branch_predictor
 (
 	.clk,
 
@@ -148,7 +147,7 @@ assign taken_hit = predict_regs_internal.taken;
 assign predict_regs_internal.taken = taken & btb_hit;
 assign predict_regs_internal.btb_address = target;
 
-branch_target_buffer btb
+branch_target_buffer #(.s_index(9)) btb
 (
 	.clk,
     

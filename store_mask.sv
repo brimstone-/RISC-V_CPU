@@ -48,7 +48,7 @@ begin
 		0: mem_wdata = store_data;
 		1: mem_wdata = {{store_data[7 :0]},{store_data[7 :0]},{store_data[7 :0]},{store_data[7 :0]}};
 		2: mem_wdata = {{store_data[15 :0]},{store_data[15 :0]}};
-		default: $display("benny sucks");
+		default:;
 		endcase
 end
 

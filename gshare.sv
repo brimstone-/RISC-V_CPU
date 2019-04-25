@@ -31,7 +31,7 @@ register #(.width(sr_size)) branch_history_register
 	.clk,
 	.load(branch),
 	.reset(1'b0),
-	.in({bhr_out[1:0], pcmux_sel}),
+	.in({bhr_out[sr_size-2:0], pcmux_sel}),
 	.out(bhr_out)
 );
 
