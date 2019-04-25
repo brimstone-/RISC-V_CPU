@@ -8,6 +8,7 @@
 - L2 cache: 2 way associative with 16 lines 8 bytes each (Twice the size of the L1 caches).
 - Eviction Write Buffer: Between L1 data cache and L2 cache with L1 arbiter.
 - Hardware Prefetcher: Between L2 cache and physical memory with L2 arbiter.
+- 2 level branch predictor with global shift register, XOR indexing, local pattern history table of 2-bit saturators, and direct mapped branch target buffer.
 - Performance Counters
 
 ## Status
