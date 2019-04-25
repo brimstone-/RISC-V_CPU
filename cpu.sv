@@ -148,12 +148,14 @@ mem stage_four
 
 writeback stage_five
 (
+	.clk,
 	.regs_in(stage_four_regs),
 	.rd_data(rd_data),
 	.ld_regfile(ld_regfile),
 	.rd(rd),
 	.dcache_out,
-	.regs_out(stage_five_regs)
+	.regs_out(stage_five_regs),
+	.stall(stall_out)
 );
 
 forward forwarding_unit

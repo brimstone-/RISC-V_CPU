@@ -1,7 +1,9 @@
 module store_mask
 (
 	input [1:0] store_type,
+	input [31:0] store_data,
 	input [1:0] alu_out,
+	output logic [31:0] mem_wdata,
 	output logic [3:0] out
 );
 
@@ -38,5 +40,18 @@ mux4 #(.width(4)) wmask_mux
 	.d(),
 	.f(out)
 );
+
+always_comb
+begin
+	mem_wdata = '0;
+	case(store_type)
+		0: mem_wdata = store_data;
+		1: mem_wdata = {{store_data[7 :0]},{store_data[7 :0]},{store_data[7 :0]},{store_data[7 :0]}};
+		2: mem_wdata = {{store_data[15 :0]},{store_data[15 :0]}};
+		default: $display("benny sucks");
+		endcase
+end
+
+
 
 endmodule : store_mask

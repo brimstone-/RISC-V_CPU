@@ -27,6 +27,8 @@ module mem (
 	input predict_regs predict_regs_in
 ); 
 
+logic [31:0] write_data;
+
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
 assign address_b = regs_in.alu;
@@ -35,7 +37,7 @@ mux2 wdata_mux
 	.sel(hazard_wb_mem[1]),
 	.a(regs_in.rs2),
 	.b(wb_mem),
-	.f(wdata)
+	.f(write_data)
 );
 
 assign reset = (predict_regs_in.taken ^ regs_in.ctrl.pcmux_sel) || ((predict_addr == 0) && (predict_regs_in.taken && regs_in.ctrl.pcmux_sel));
@@ -53,7 +55,9 @@ register #($bits(regs_in)) stage_reg (
 store_mask store_mask
 (
 	.store_type(regs_in.ctrl.store_type),
+	.store_data(write_data),
 	.alu_out(regs_in.alu[1:0]),
+	.mem_wdata(wdata),
 	.out(wmask)
 );
 

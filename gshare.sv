@@ -17,12 +17,10 @@ module gshare #(parameter sr_size = 3, parameter bht_size = 2**sr_size)(
 
 // PHT: 00 SN | 01 WN | 10 WT | 11 ST
 logic [1:0] branch_history_table [bht_size];
-logic [2:0] reg_out, bht_index, prev_bht_index;    // access pht (size 3: 2^3 = 8 = bht_size)
+logic [2:0] bht_index, prev_bht_index;    // access pht (size 3: 2^3 = 8 = bht_size)
 logic branch;
 
 initial begin
-	reg_out = 3'b00;
-	
 	for(int i = 0; i < bht_size; i++) begin
 		branch_history_table[i] = 2'b01;       // initalize all pattern histoy table to WNT
 	end
@@ -33,7 +31,7 @@ register #(.width(sr_size)) branch_history_register
 	.clk,
 	.load(branch),
 	.reset(1'b0),
-	.in({reg_out[1:0], pcmux_sel}),
+	.in({bhr_out[1:0], pcmux_sel}),
 	.out(bhr_out)
 );
 
