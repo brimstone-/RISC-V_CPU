@@ -36,8 +36,8 @@
 # -------------------------------------------------------------------------- #
 
 
-set_global_assignment -name DEVICE EP3SE80F1152C2
-set_global_assignment -name FAMILY "Stratix III"
+set_global_assignment -name DEVICE 5SGXEA7N2F45C2
+set_global_assignment -name FAMILY "Stratix V"
 set_global_assignment -name TOP_LEVEL_ENTITY mp3
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "15:37:37  MARCH 14, 2019"
