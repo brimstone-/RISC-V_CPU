@@ -18,7 +18,6 @@ module counter
    input rv32i_word l2_miss_count,
    input rv32i_word ewb_writes_count,
 	input rv32i_word branch_total_count,
-   input rv32i_word branch_correct_count,
    input rv32i_word branch_incorrect_count,
    input rv32i_word prefetch_hit_count,
    input rv32i_word prefetch_read_count,
@@ -31,7 +30,6 @@ module counter
    output logic l2_miss_reset,
    output logic ewb_writes_reset,
    output logic branch_total_reset,
-   output logic branch_correct_reset,
    output logic branch_incorrect_reset,
    output logic prefetch_hit_reset,
    output logic prefetch_read_reset
@@ -51,7 +49,6 @@ assign addr_hit = ((tag == icache_hit)
                 | (tag == l2_miss)
                 | (tag == ewb_writes)
                 | (tag == branch_total)
-                | (tag == branch_correct)
                 | (tag == branch_incorrect)
                 | (tag == prefetch_hit)
                 | (tag == prefetch_read))
@@ -73,7 +70,6 @@ begin
 	l2_miss_reset = 0;
 	ewb_writes_reset = 0;
 	branch_total_reset = 0;
-	branch_correct_reset = 0;
 	branch_incorrect_reset = 0;
 	prefetch_hit_reset = 0;
 	prefetch_read_reset = 0;
@@ -89,7 +85,6 @@ begin
 			l2_miss          : mem_rdata = l2_miss_count;
 			ewb_writes       : mem_rdata = ewb_writes_count;
 			branch_total     : mem_rdata = branch_total_count;
-			branch_correct   : mem_rdata = branch_correct_count;
 			branch_incorrect : mem_rdata = branch_incorrect_count;
 			prefetch_hit     : mem_rdata = prefetch_hit_count;
 			prefetch_read    : mem_rdata = prefetch_read_count;
@@ -106,7 +101,6 @@ begin
 			l2_miss          : l2_miss_reset = 1;
 			ewb_writes       : ewb_writes_reset = 1;
 			branch_total     : branch_total_reset = 1;
-			branch_correct   : branch_correct_reset = 1;
 			branch_incorrect : branch_incorrect_reset = 1;
 			prefetch_hit     : prefetch_hit_reset = 1;
 			prefetch_read    : prefetch_read_reset = 1;

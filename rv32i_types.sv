@@ -67,10 +67,9 @@ typedef enum bit [7:0] {
    l2_miss          = 8'h14,
    ewb_writes       = 8'h18,
    branch_total     = 8'h1c,
-   branch_correct   = 8'h20,
-   branch_incorrect = 8'h24,
-   prefetch_hit     = 8'h28,
-   prefetch_read    = 8'h2c
+   branch_incorrect = 8'h20,
+   prefetch_hit     = 8'h24,
+   prefetch_read    = 8'h28
 } counter_addr;
 
 typedef struct packed {
