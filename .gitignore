@@ -31,3 +31,5 @@ timing
 *.sopc_builder
 *.summary
 *.tcl
+dl_*
+ul_*

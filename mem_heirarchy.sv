@@ -28,11 +28,9 @@ module mem_heirarchy
    input pmem_resp,
    
    input logic [31:0] branch_total_count,
-   input logic [31:0] branch_correct_count,
    input logic [31:0] branch_incorrect_count,
    
    output logic branch_total_reset,
-   output logic branch_correct_reset,
    output logic branch_incorrect_reset
 );
 
@@ -96,8 +94,8 @@ logic [31:0] dcache_miss_count;
 logic [31:0] l2_hit_count;
 logic [31:0] l2_miss_count;
 logic [31:0] ewb_writes_count;
-logic [31:0] prefetch_hit_count;
-logic [31:0] prefetch_read_count;
+//logic [31:0] prefetch_hit_count;
+//logic [31:0] prefetch_read_count;
 
 logic icache_hit_reset;
 logic icache_miss_reset;
@@ -139,10 +137,9 @@ counter counter
    .l2_miss_count,
    .ewb_writes_count,
    .branch_total_count,
-   .branch_correct_count,
    .branch_incorrect_count,
-   .prefetch_hit_count,
-   .prefetch_read_count,
+//   .prefetch_hit_count,
+//   .prefetch_read_count,
 
    .icache_hit_reset,
    .icache_miss_reset,
@@ -152,10 +149,9 @@ counter counter
    .l2_miss_reset,
    .ewb_writes_reset,
    .branch_total_reset,
-   .branch_correct_reset,
-   .branch_incorrect_reset,
-   .prefetch_hit_reset,
-   .prefetch_read_reset
+   .branch_incorrect_reset
+//   .prefetch_hit_reset,
+//   .prefetch_read_reset
 );
 
 // icache
@@ -266,35 +262,7 @@ L2_cache #(.s_index(4)) L2_cache
    .l2_miss_reset
 );
 
-assign L2_resp = pre_resp | ewb_resp | L2_arb_resp;
-
-mux2 #(.width(256)) L2_rdata_mux
-(
-   .sel(pre_resp),
-   .a(L2_arb_rdata),
-   .b(pre_rdata),
-   .f(L2_rdata)
-);
-
-prefetch prefetch
-(
-   .clk,
-
-   .cache_read(L2_read),
-   .cache_addr(L2_addr),
-
-   .pre_resp,
-   .pre_rdata,
-   .pre_read,
-   .pre_addr,
-   .arb_pre_rdata,
-   .arb_pre_resp,
-   
-   .prefetch_hit_count,
-   .prefetch_read_count,
-   .prefetch_hit_reset,
-   .prefetch_read_reset
-);
+assign L2_resp = L2_arb_resp | ewb_resp;
 
 external_write_buffer ewb
 (
@@ -322,14 +290,8 @@ L2_arbiter L2_arbiter
    // from/to L2
    .L2_read,
    .L2_addr,
-   .L2_rdata(L2_arb_rdata),
+   .L2_rdata,
    .L2_arb_resp,
-   
-   // from/to prefetcher
-   .pre_read,
-   .pre_addr,
-   .arb_pre_rdata,
-   .arb_pre_resp,
 
    // ewb
    .arb_ewb_resp,

@@ -6,7 +6,7 @@ module mem (
 	output logic reset,
 	input stage_regs regs_in, 
 	
-	input resp_a,
+	input logic resp_a,
 	input logic resp_b,
 	
 	input rv32i_word rdata_b,
@@ -24,10 +24,19 @@ module mem (
 	input stall_in,
 	output logic stall_out,
 	output logic predict_addr,
-	input predict_regs predict_regs_in
+	input predict_regs predict_regs_in,
+	
+	output logic [31:0] branch_total_count,
+	output logic [31:0] branch_incorrect_count,
+	
+	input logic branch_total_reset,
+	input logic branch_incorrect_reset
 ); 
 
 logic [31:0] write_data;
+
+logic load_branch_total, load_branch_incorrect;
+logic [31:0] branch_total_out, branch_incorrect_out;
 
 assign read_b = regs_in.ctrl.read_b;
 assign write = regs_in.ctrl.write;
@@ -68,6 +77,28 @@ register rdata
 	.load(resp_b && read_b && resp_a),
 	.in(rdata_b),
 	.out(dcache_out)
+);
+
+assign load_branch_total = (regs_in.ctrl.opcode == op_br | regs_in.ctrl.opcode == op_jal | regs_in.ctrl.opcode == op_jalr) & ~stall_out;
+assign branch_total_count = branch_total_out;
+register #(.width(32)) branch_total_reg
+(
+	.clk,
+	.load(load_branch_total),
+	.reset(branch_total_reset),
+	.in(branch_total_out + 1),
+	.out(branch_total_out)
+);
+
+assign branch_incorrect_count = branch_incorrect_out;
+assign load_branch_incorrect  = reset & load_branch_total;
+register #(.width(32)) branch_incorrect_reg
+(
+	.clk,
+	.load(load_branch_incorrect),
+	.reset(branch_incorrect_reset),
+	.in(branch_incorrect_out + 1),
+	.out(branch_incorrect_out)
 );
 
 endmodule: mem

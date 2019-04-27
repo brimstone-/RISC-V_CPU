@@ -10,12 +10,7 @@ module L2_arbiter
 	output logic [255:0] L2_rdata,
 	output logic L2_arb_resp,
 	
-	// from/to prefetcher
-	input pre_read,
-	input rv32i_word pre_addr,
-	output logic [255:0] arb_pre_rdata,
-	output logic arb_pre_resp,
-	
+	// ewb
 	output logic arb_ewb_resp,
 	input ewb_write,
 	input [255:0] ewb_wdata,
@@ -31,21 +26,19 @@ module L2_arbiter
 );
 
 rv32i_word addr_mux_out;
-logic [1:0] addr_mux_sel;
+logic addr_mux_sel;
 logic load_rdata, load_wdata, load_addr;
 logic [255:0] rdata_out, wdata_out;
-logic load_type, pre_hit;
+logic load_type;
 logic [1:0] transaction_type_in, transaction_type_out;
 
-assign pre_hit = L2_addr == pre_addr;
+assign L2_rdata = rdata_out;
 
-mux4 addr_mux
+mux2 addr_mux
 (
 	.sel(addr_mux_sel),
 	.a(L2_addr),
-	.b(pre_addr),
-	.c(ewb_addr),
-	.d(),
+	.b(ewb_addr),
 	.f(addr_mux_out)
 );
 
@@ -57,9 +50,6 @@ register addr_reg
 	.in(addr_mux_out),
 	.out(pmem_address)
 );
-
-assign arb_pre_rdata = rdata_out;
-assign L2_rdata = rdata_out;
 
 register #(.width(256)) rdata_reg
 (
@@ -97,7 +87,6 @@ enum int unsigned {
 	idle,
 	demand_read,
 	demand_write,
-	prefetch,
 	reading,
 	writing,
 	finish
@@ -119,7 +108,6 @@ begin : state_actions
 	pmem_write = 0;
 
 	L2_arb_resp = 0;
-	arb_pre_resp = 0;
 	arb_ewb_resp = 0;
 
 	case(state)
@@ -131,15 +119,9 @@ begin : state_actions
 			transaction_type_in = 0;
 		end
 		demand_write: begin
-			addr_mux_sel = 2;
-			load_addr = 1;
-			load_wdata = 1;
-			load_type = 1;
-			transaction_type_in = 2;
-		end
-		prefetch: begin
 			addr_mux_sel = 1;
 			load_addr = 1;
+			load_wdata = 1;
 			load_type = 1;
 			transaction_type_in = 1;
 		end
@@ -153,8 +135,7 @@ begin : state_actions
 		finish: begin
 			case (transaction_type_out)
 				0: L2_arb_resp = 1;
-				1: arb_pre_resp = 1;
-				2: arb_ewb_resp = 1;
+				1: arb_ewb_resp = 1;
 				default: ;
 			endcase // transaction_type_out
 		end
@@ -167,15 +148,13 @@ begin : next_state_logic
 	next_state = state;
 	case(state)
 		idle: begin
-			if (L2_read & ~pre_hit) next_state = demand_read;
+			if (L2_read) next_state = demand_read;
 			else if (ewb_write) next_state = demand_write;
-			else if (pre_read) next_state = prefetch;
 			else next_state = idle;
 		end
 
 		demand_read: next_state = reading;
 		demand_write: next_state = writing;
-		prefetch: next_state = reading;
 
 		reading: begin
 			if (pmem_resp) next_state = finish;

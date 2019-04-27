@@ -31,11 +31,9 @@ rv32i_word rdata_b;
 
 // counter signals
 logic [31:0] branch_total_count;
-logic [31:0] branch_correct_count;
 logic [31:0] branch_incorrect_count;
 
 logic branch_total_reset;
-logic branch_correct_reset;
 logic branch_incorrect_reset;
 
 cpu cpu

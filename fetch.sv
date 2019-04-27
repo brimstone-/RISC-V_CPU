@@ -13,15 +13,7 @@ module fetch (
 	output rv32i_word pc,
 	input reset_mux,
 	input stall_in,
-	input predict_addr,
-	
-	output rv32i_word branch_total_count,
-	output rv32i_word branch_correct_count,
-	output rv32i_word branch_incorrect_count,
-	
-	input branch_total_reset,
-	input branch_correct_reset,
-	input branch_incorrect_reset
+	input predict_addr
 );
 
 predict_regs predict_regs_internal;
@@ -36,12 +28,6 @@ logic taken, taken_hit, btb_hit;
 logic [1:0] mux_sel;
 logic [3:0] select;
 
-logic load_branch_total;
-logic load_branch_correct;
-logic load_branch_correct_final;
-logic load_branch_incorrect;
-logic load_branch_incorrect_final;
-
 logic [31:0] branch_total_out;
 logic [31:0] branch_correct_out;
 logic [31:0] branch_incorrect_out;
@@ -51,49 +37,17 @@ assign select = {predict_addr,regs_in.ctrl.pcmux_sel,predict_regs_in.taken,taken
 always_comb
 begin
 	mux_sel = 0;
-	load_branch_correct = 0;
-	load_branch_incorrect = 0;
 	casex(select)
-      4'b0110: begin
-         mux_sel = 3;
-         load_branch_incorrect = 1;
-      end               // we predicted branch, we branched, we got the wrong address (incorrect)
-      4'b0111: begin
-         mux_sel = 3;
-         load_branch_incorrect = 1;
-      end            // we predicted branch, we branched, we got the wrong address (incorrect)
-      4'b1110: begin
-         mux_sel = 0;
-         load_branch_correct = 1;
-      end            // we predicted branch, we did branch, addresses were correct, do not predict branch (correct)
-      4'b1111: begin
-         mux_sel = 1;
-         load_branch_correct = 1;
-      end            // we predicted branch, we did branch, addresses were correct, predict branch (correct)
-      4'b?000: begin
-         mux_sel = 0;
-         load_branch_correct = 1;
-      end               // we did not predict branch, we did not branch, do no predict branch (correct)
-      4'b?001: begin
-         mux_sel = 1;
-         load_branch_correct = 1;
-      end            // we did not predict branch, we did not branch, predict branch (correct)
-      4'b?010: begin
-         mux_sel = 2;
-         load_branch_incorrect = 1;
-      end            // we predicted branch, we did not branch (incorrect)
-      4'b?011: begin
-         mux_sel = 2;
-         load_branch_incorrect = 1;
-      end            // we predicted branch, we did not branch (incorrect)
-      4'b?100: begin
-         mux_sel = 3;
-         load_branch_incorrect = 1;
-      end            // we did not predict branch, we did branch (incorrect)
-      4'b?101: begin
-         mux_sel = 3;
-         load_branch_incorrect = 1;
-      end            // we did not predict branch, we did branch (incorrect)
+		4'b0110: mux_sel = 3;       // we predicted branch, we branched, we got the wrong address
+		4'b0111: mux_sel = 3;		 // we predicted branch, we branched, we got the wrong address
+		4'b1110: mux_sel = 0;		 // we predicted branch, we did branch, addresses were correct, do not predict branch
+		4'b1111:	mux_sel = 1;		 // we predicted branch, we did branch, addresses were correct, predict branch
+		4'b?000: mux_sel = 0;       // we did not predict branch, we did not branch, do no predict branch
+		4'b?001: mux_sel = 1;		 // we did not predict branch, we did not branch, predict branch
+		4'b?010: mux_sel = 2;		 // we predicted branch, we did not branch
+		4'b?011: mux_sel = 2;		 // we predicted branch, we did not branch
+		4'b?100: mux_sel = 3;		 // we did not predict branch, we did branch
+		4'b?101: mux_sel = 3;	 	 // we did not predict branch, we did branch
 	endcase
 end
 
@@ -115,12 +69,11 @@ pc_register pc_reg (
 );
 
 assign pc = pc_out;
-
 assign address_a = pc_out;
+
 initial begin
 	read_a = 1;
 end
-
 
 always_ff @(posedge clk)
 begin
@@ -161,38 +114,5 @@ branch_target_buffer #(.s_index(9)) btb
 );
 
 assign predict_regs_out = predict_regs_internal;
-
-assign load_branch_total = (regs_in.ctrl.opcode == op_br | regs_in.ctrl.opcode == op_jal | regs_in.ctrl.opcode == op_jalr);
-assign branch_total_count = branch_total_out;
-register #(.width(32)) branch_total_reg
-(
-	.clk,
-	.load(load_branch_total),
-	.reset(branch_total_reset),
-	.in(branch_total_out + 1),
-	.out(branch_total_out)
-);
-
-assign branch_correct_count = branch_correct_out;
-assign load_branch_correct_final = load_branch_correct & load_branch_total;
-register #(.width(32)) branch_correct_reg
-(
-	.clk,
-	.load(load_branch_correct_final),
-	.reset(branch_correct_reset),
-	.in(branch_correct_out + 1),
-	.out(branch_correct_out)
-);
-
-assign branch_incorrect_count = branch_incorrect_out;
-assign load_branch_incorrect_final = load_branch_incorrect & load_branch_total;
-register #(.width(32)) branch_incorrect_reg
-(
-	.clk,
-	.load(load_branch_incorrect_final),
-	.reset(branch_incorrect_reset),
-	.in(branch_incorrect_out + 1),
-	.out(branch_incorrect_out)
-);
 
 endmodule: fetch
