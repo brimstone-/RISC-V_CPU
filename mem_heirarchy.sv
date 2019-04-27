@@ -28,11 +28,9 @@ module mem_heirarchy
    input pmem_resp,
    
    input logic [31:0] branch_total_count,
-   input logic [31:0] branch_correct_count,
    input logic [31:0] branch_incorrect_count,
    
    output logic branch_total_reset,
-   output logic branch_correct_reset,
    output logic branch_incorrect_reset
 );
 
@@ -139,7 +137,6 @@ counter counter
    .l2_miss_count,
    .ewb_writes_count,
    .branch_total_count,
-   .branch_correct_count,
    .branch_incorrect_count,
    .prefetch_hit_count,
    .prefetch_read_count,
@@ -152,7 +149,6 @@ counter counter
    .l2_miss_reset,
    .ewb_writes_reset,
    .branch_total_reset,
-   .branch_correct_reset,
    .branch_incorrect_reset,
    .prefetch_hit_reset,
    .prefetch_read_reset

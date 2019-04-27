@@ -17,7 +17,7 @@ module gshare #(parameter sr_size = 3, parameter bht_size = 2**sr_size)(
 
 // PHT: 00 SN | 01 WN | 10 WT | 11 ST
 logic [1:0] branch_history_table [bht_size];
-logic [2:0] bht_index, prev_bht_index;    // access pht (size 3: 2^3 = 8 = bht_size)
+logic [sr_size-1:0] bht_index, prev_bht_index;    // access pht (size 3: 2^3 = 8 = bht_size)
 logic branch;
 
 initial begin
@@ -35,8 +35,8 @@ register #(.width(sr_size)) branch_history_register
 	.out(bhr_out)
 );
 
-assign bht_index = fetch_pc[4:2] ^ bhr_out;
-assign prev_bht_index = exec_pc[4:2] ^ bhr_in;
+assign bht_index = fetch_pc[sr_size+1:2] ^ bhr_out;
+assign prev_bht_index = exec_pc[sr_size+1:2] ^ bhr_in;
 assign branch = (opcode == op_br | opcode == op_jal | opcode == op_jalr);
 
 

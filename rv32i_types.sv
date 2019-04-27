@@ -121,7 +121,7 @@ typedef struct packed {
 } cache_regs;
 
 typedef struct packed {
-	logic [5:0] bhr;
+	logic [4:0] bhr;
 	logic taken;
 	logic [31:0] btb_address;
 } predict_regs;
