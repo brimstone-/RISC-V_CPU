@@ -80,7 +80,7 @@ begin
 	read_a = resp_b;
 end
 
-gshare #(.sr_size(6)) branch_predictor
+gshare #(.sr_size(5)) branch_predictor
 (
 	.clk,
 

@@ -79,12 +79,12 @@ logic [255:0] L2_rdata;
 logic [255:0] L2_arb_rdata;
 logic [255:0] L2_wdata;
 
-logic pre_resp;
-logic [255:0] pre_rdata;
-logic pre_read;
-rv32i_word pre_addr;
-logic [255:0] arb_pre_rdata;
-logic arb_pre_resp;
+//logic pre_resp;
+//logic [255:0] pre_rdata;
+//logic pre_read;
+//rv32i_word pre_addr;
+//logic [255:0] arb_pre_rdata;
+//logic arb_pre_resp;
 
 // counter signals
 logic [31:0] icache_hit_count;
